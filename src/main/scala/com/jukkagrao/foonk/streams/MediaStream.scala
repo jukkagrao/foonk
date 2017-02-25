@@ -1,4 +1,4 @@
-package foonk.streams
+package com.jukkagrao.foonk.streams
 
 import akka.NotUsed
 import akka.actor.ActorSystem
@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.ContentType
 import akka.stream.{Materializer, SharedKillSwitch}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import foonk.utils.SourceSwitcher
+import com.jukkagrao.foonk.utils.SourceSwitcher
 
 import scala.concurrent.ExecutionContext
 

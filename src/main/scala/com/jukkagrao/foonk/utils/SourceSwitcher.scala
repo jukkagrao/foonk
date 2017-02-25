@@ -1,11 +1,11 @@
-package foonk.utils
+package com.jukkagrao.foonk.utils
 
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.stream.scaladsl.{BroadcastHub, Keep, MergeHub, Sink, Source}
 import akka.util.ByteString
-import foonk.streams.MediaStream
+import com.jukkagrao.foonk.streams.MediaStream
 
 import scala.concurrent.ExecutionContext
 

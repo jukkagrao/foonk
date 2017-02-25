@@ -1,4 +1,4 @@
-package foonk.http.methods
+package com.jukkagrao.foonk.http.methods
 
 import akka.http.scaladsl.model.HttpMethod
 import akka.http.scaladsl.model.RequestEntityAcceptance.Expected

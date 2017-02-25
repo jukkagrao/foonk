@@ -1,4 +1,4 @@
-package foonk.streams
+package com.jukkagrao.foonk.streams
 
 import akka.NotUsed
 import akka.actor.ActorSystem
@@ -38,7 +38,7 @@ object SourceMediaStream {
                                       (implicit sys: ActorSystem, mat: Materializer, ev: ExecutionContext)
     extends MediaStream {
 
-    println(s"Source $path created")
+    sys.log.info(s"Source $path created")
 
     def stream: Source[ByteString, NotUsed] = switcher.stream
   }

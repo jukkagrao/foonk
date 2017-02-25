@@ -1,4 +1,4 @@
-package foonk
+package com.jukkagrao.foonk
 
 import akka.actor.{ActorSystem, Scheduler}
 import akka.event.LoggingAdapter
@@ -6,8 +6,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.{ParserSettings, ServerSettings}
 import akka.stream.ActorMaterializer
-import foonk.http.methods.SourceMethod
-import foonk.proxy.OldSourceProxy
+import com.jukkagrao.foonk.http.methods.SourceMethod
+import com.jukkagrao.foonk.proxy.OldSourceProxy
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}

@@ -1,4 +1,4 @@
-package foonk.proxy
+package com.jukkagrao.foonk.proxy
 
 import akka.NotUsed
 import akka.actor.ActorSystem

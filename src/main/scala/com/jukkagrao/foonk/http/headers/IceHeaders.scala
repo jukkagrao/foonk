@@ -1,4 +1,4 @@
-package foonk.http.headers
+package com.jukkagrao.foonk.http.headers
 
 import akka.http.scaladsl.model.headers._
 

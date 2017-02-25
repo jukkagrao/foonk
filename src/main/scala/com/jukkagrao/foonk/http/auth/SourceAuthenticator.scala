@@ -1,4 +1,4 @@
-package foonk.http.auth
+package com.jukkagrao.foonk.http.auth
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.server.directives.Credentials

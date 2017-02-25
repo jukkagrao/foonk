@@ -1,5 +1,15 @@
-Foonk
+## Foonk
 
-An streaming media server based on akka streams.
+A streaming media server based on akka-streams.
 
-Currently it's tested with mp3 and libshout.
+### Configuration
+
+All settings currently here:
+`src/main/resources/aplication.conf`
+
+For connecting a source client (based on libshout) it uses port + 1.
+(On this port running a proxy for ICE protocol handling) 
+
+### Building
+
+Just run `sbt assembly` command to create executable jar file.

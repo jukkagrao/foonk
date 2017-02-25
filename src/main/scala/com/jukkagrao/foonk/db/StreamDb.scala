@@ -1,4 +1,6 @@
-package foonk.streams
+package com.jukkagrao.foonk.db
+
+import com.jukkagrao.foonk.streams.MediaStream
 
 import scala.collection.parallel.mutable
 import scala.collection.parallel.mutable.ParHashMap
@@ -20,5 +22,7 @@ object StreamDb {
   }
 
   def get(key: String): Option[MediaStream] = streams.get(key)
+
+  def all: List[(String, MediaStream)] = streams.toList
 
 }

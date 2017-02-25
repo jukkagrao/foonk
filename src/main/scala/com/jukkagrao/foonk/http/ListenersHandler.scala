@@ -1,9 +1,9 @@
-package foonk.http
+package com.jukkagrao.foonk.http
 
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import foonk.streams.StreamDb
+import com.jukkagrao.foonk.db.StreamDb
 
 object ListenersHandler {
   val route: Route =

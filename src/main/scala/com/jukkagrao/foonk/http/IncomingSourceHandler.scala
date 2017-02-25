@@ -1,4 +1,4 @@
-package foonk.http
+package com.jukkagrao.foonk.http
 
 import akka.Done
 import akka.actor.ActorSystem
@@ -7,9 +7,10 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Sink
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import foonk.http.auth.SourceAuthenticator
-import foonk.http.methods.SourceMethod
-import foonk.streams.{SourceMediaStream, StreamDb}
+import com.jukkagrao.foonk.db.StreamDb
+import com.jukkagrao.foonk.http.auth.SourceAuthenticator
+import com.jukkagrao.foonk.http.methods.SourceMethod
+import com.jukkagrao.foonk.streams.SourceMediaStream
 
 import scala.concurrent.{ExecutionContext, Future}
 
