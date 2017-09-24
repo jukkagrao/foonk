@@ -20,7 +20,7 @@ class SourceSwitcher(src: MediaStream)
   val (sink: Sink[(String, ByteString), NotUsed], stream: Source[ByteString, NotUsed]) =
     MergeHub.source[(String, ByteString)].filter(_._1 == current)
       .via(src.killSwitch.flow)
-      .map(_._2).toMat(BroadcastHub.sink[ByteString](bufferSize = 1024))(Keep.both)
+      .map(_._2).toMat(BroadcastHub.sink[ByteString](bufferSize = 8))(Keep.both)
       .run()
 
   stream.runWith(Sink.ignore)

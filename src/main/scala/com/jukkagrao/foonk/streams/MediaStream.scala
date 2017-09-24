@@ -19,9 +19,11 @@ trait MediaStream {
 
   def contentType: ContentType
 
-  def genre: Option[String]
+  def name: Option[String]
 
   def description: Option[String]
+
+  def genre: Option[String]
 
   def public: Boolean
 

@@ -10,7 +10,7 @@ object Foonk extends Scaffolding with App {
   runWebService {
     ApiService.route ~
     ListenersHandler.route ~
-      IncomingSourceHandler()
+    IncomingSourceHandler()
   }
 
 }

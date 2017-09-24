@@ -18,8 +18,8 @@ import scala.concurrent.duration.Duration
   * It listen incoming connections on port + 1
   *
   * @param interface network interface of stream server
-  * @param port of stream server
-  * @param settings ServerSettings
+  * @param port      of stream server
+  * @param settings  ServerSettings
   */
 
 class OldSourceProxy(interface: String, port: Int, settings: ServerSettings)
@@ -48,10 +48,12 @@ class OldSourceProxy(interface: String, port: Int, settings: ServerSettings)
 
   val flow: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].prefixAndTail(1)
     .flatMapConcat { case (head, tail) =>
-      Source(head).map(rewriteRequestHeaders)
+      Source(head)
+        .map(rewriteRequestHeaders)
         .concat(tail
           .map(toChunkedEncoding)
-        )}.via(outgoingConnection.map(rewriteResponseHeaders))
+        )
+    }.via(outgoingConnection.map(rewriteResponseHeaders))
 
 
   private def rewriteRequestHeaders(headers: ByteString) = {
