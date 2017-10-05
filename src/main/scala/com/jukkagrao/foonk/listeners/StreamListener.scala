@@ -2,6 +2,7 @@ package com.jukkagrao.foonk.listeners
 
 import akka.NotUsed
 import akka.http.scaladsl.model.{DateTime, RemoteAddress}
+import akka.stream.KillSwitch
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 
@@ -17,9 +18,9 @@ trait StreamListener {
 
   def connected: DateTime
 
-//  def killSwitch: UniqueKillSwitch
+  def killSwitch: KillSwitch
 
-//  def kill(): Unit = killSwitch.shutdown()
+  def kill(): Unit = killSwitch.shutdown()
 
 }
 
