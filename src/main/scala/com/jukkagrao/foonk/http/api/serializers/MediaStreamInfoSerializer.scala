@@ -15,7 +15,7 @@ final case class MediaStreamInfoSerializer(@(ApiModelProperty@field)(value = "Me
                                            listeners: List[ListenerSerializer])
 
 object MediaStreamInfoSerializer extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val streamInfoFormat = jsonFormat2(MediaStreamInfoSerializer.apply)
+  implicit val jsonFormat = jsonFormat2(MediaStreamInfoSerializer.apply)
 
   def apply(streamWithListeners: (MediaStream, List[ListenerSerializer])): MediaStreamInfoSerializer = {
     val stream = streamWithListeners._1

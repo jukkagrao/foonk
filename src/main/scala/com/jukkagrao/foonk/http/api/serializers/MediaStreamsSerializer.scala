@@ -8,5 +8,5 @@ import spray.json.DefaultJsonProtocol
 final case class MediaStreamsSerializer(streams: List[MediaStreamSerializer])
 
 object MediaStreamsSerializer extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val streamsFormat = jsonFormat1(MediaStreamsSerializer.apply)
+  implicit val jsonFormat = jsonFormat1(MediaStreamsSerializer.apply)
 }

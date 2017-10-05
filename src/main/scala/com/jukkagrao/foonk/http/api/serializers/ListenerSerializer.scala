@@ -19,7 +19,7 @@ final case class ListenerSerializer(@(ApiModelProperty@field)(value = "ID")
                                     connected: String)
 
 object ListenerSerializer extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val listenerFormat = jsonFormat3(ListenerSerializer.apply)
+  implicit val jsonFormat = jsonFormat3(ListenerSerializer.apply)
 
   def apply(listener: StreamListener): ListenerSerializer =
     new ListenerSerializer(listener.id,
