@@ -13,8 +13,8 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
 class Scaffolding {
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionService: ExecutionContextExecutor = system.dispatcher
   implicit val scheduler: Scheduler = system.scheduler
 
@@ -40,15 +40,14 @@ class Scaffolding {
 
     if (config.getBoolean("icy-support")) {
 
-      val proxy = new OldSourceProxy(interface, port, serverSettings)
+      val proxy = new OldSourceProxy(interface, port, serverSettings).proxy()
 
-      proxy.proxy()
-        .onComplete {
-          case Success(x) ⇒
-            log.info(s"Proxy Source Server is listening on ${x.localAddress.getHostName}:${x.localAddress.getPort}")
-          case Failure(e) ⇒
-            log.warning(s"Binding failed with ${e.getMessage}")
-        }
+      proxy.onComplete {
+        case Success(x) ⇒
+          log.info(s"Proxy Source Server is listening on ${x.localAddress.getHostName}:${x.localAddress.getPort}")
+        case Failure(e) ⇒
+          log.warning(s"Binding failed with ${e.getMessage}")
+      }
     }
 
   }

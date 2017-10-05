@@ -1,30 +1,32 @@
 package com.jukkagrao.foonk.http
 
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import akka.stream.OverflowStrategy
-import com.jukkagrao.foonk.db.StreamDb
-import com.jukkagrao.foonk.http.headers._
+import akka.http.scaladsl.server.Route
+import com.jukkagrao.foonk.db.{ListenerDb, StreamDb}
+import com.jukkagrao.foonk.http.directives.Directives._
+import com.jukkagrao.foonk.listeners.Listener
+
+import scala.concurrent.ExecutionContext
 
 object ListenersHandler {
-  val route: Route =
-    get {
-      extractRequest { request =>
-        val path = request.uri.path.toString()
-        StreamDb.get(path) match {
-          case Some(strm) =>
-            complete(HttpResponse(entity =
-              HttpEntity(strm.contentType,
-                strm.stream.buffer(8, OverflowStrategy.dropHead)
-              )
-            ).withHeaders(
-              `Icy-Name`(strm.name.getOrElse("")),
-              `Icy-Genre`(strm.genre.getOrElse("")),
-              `Icy-Description`(strm.description.getOrElse(""))
-            ))
-          case None => complete(StatusCodes.NotFound)
-        }
+  def route(implicit ex: ExecutionContext): Route =
+    (get & streamPath & extractClientIP) { (sPath, ip) =>
+      StreamDb.get(sPath) match {
+        case Some(strm) =>
+          val listener = Listener(sPath, ip, strm.stream)
+          ListenerDb.update(listener.id, listener)
+
+          respondWithIcyHeaders(strm) {
+            complete(HttpResponse(entity = HttpEntity(strm.contentType,
+              listener.stream.watchTermination() {
+                              (mat, futDone) =>
+                                futDone.onComplete ( _ => ListenerDb.remove(listener.id))
+                                mat
+                            }
+            )))
+          }
+        case None => complete(StatusCodes.NotFound)
       }
     }
 

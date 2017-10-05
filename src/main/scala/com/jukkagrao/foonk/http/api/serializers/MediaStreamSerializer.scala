@@ -1,29 +1,55 @@
 package com.jukkagrao.foonk.http.api.serializers
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.jukkagrao.foonk.streams.MediaStream
 import io.swagger.annotations._
+import spray.json.DefaultJsonProtocol
 
 import scala.annotation.meta.field
 
 
 @ApiModel(description = "MediaStream")
-final case class MediaStreamSerializer(
-                              @(ApiModelProperty@field)(value = "Stream path")
-                              path: String,
+final case class MediaStreamSerializer(@(ApiModelProperty@field)(value = "Stream path")
+                                       path: String,
 
-                              @(ApiModelProperty@field)(value = "Stream contentType")
-                              contentType: String,
+                                       @(ApiModelProperty@field)(value = "ContentType")
+                                       contentType: String,
 
-                              @(ApiModelProperty@field)(value = "Stream description")
-                              description: Option[String])
+                                       @(ApiModelProperty@field)(value = "Bitrate")
+                                       bitrate: Option[String],
 
-object MediaStreamSerializer {
-  def apply(path: String, stream: MediaStream): MediaStreamSerializer = {
+                                       @(ApiModelProperty@field)(value = "Station name")
+                                       name: Option[String],
+
+                                       @(ApiModelProperty@field)(value = "Genre")
+                                       genre: Option[String],
+
+                                       @(ApiModelProperty@field)(value = "Stream description")
+                                       description: Option[String],
+
+                                       @(ApiModelProperty@field)(value = "Station URL")
+                                       url: Option[String],
+
+                                       @(ApiModelProperty@field)(value = "Connection time")
+                                       connected: String,
+
+                                       @(ApiModelProperty@field)(value = "Amount of listeners")
+                                       listeners: Int)
+
+object MediaStreamSerializer extends SprayJsonSupport with DefaultJsonProtocol {
+  implicit val streamFormat = jsonFormat9(MediaStreamSerializer.apply)
+
+  def apply(stream: MediaStream, listeners: Int = 0): MediaStreamSerializer = {
     MediaStreamSerializer(
-      path,
+      stream.path,
       stream.contentType.toString(),
-      stream.description
-    )
+      stream.bitrate,
+      stream.name,
+      stream.genre,
+      stream.description,
+      stream.url,
+      stream.connected.toIsoDateTimeString,
+      listeners)
   }
 }
 

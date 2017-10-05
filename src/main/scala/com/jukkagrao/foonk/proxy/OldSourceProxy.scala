@@ -5,11 +5,13 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.settings.ServerSettings
 import akka.stream.Materializer
 import akka.stream.scaladsl.Tcp.ServerBinding
-import akka.stream.scaladsl.{Flow, Sink, Source, Tcp}
+import akka.stream.scaladsl.{Flow, Framing, Sink, Source, Tcp}
 import akka.util.ByteString
+import com.ibm.icu.text.CharsetDetector
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.util.{Success, Try}
 
 /** *
   *
@@ -49,12 +51,31 @@ class OldSourceProxy(interface: String, port: Int, settings: ServerSettings)
   val flow: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].prefixAndTail(1)
     .flatMapConcat { case (head, tail) =>
       Source(head)
+        .map(detectCharset)
         .map(rewriteRequestHeaders)
         .concat(tail
           .map(toChunkedEncoding)
         )
     }.via(outgoingConnection.map(rewriteResponseHeaders))
 
+  private def detectCharset(headers: ByteString) = {
+    val bytes: Future[ByteString] = Source(headers :: Nil).via(Framing.delimiter(ByteString("\n"), Int.MaxValue))
+      .filter(bs => bs.utf8String.contains("description") || bs.utf8String.contains("name"))
+      .map(_.dropWhile(_ != ':'.toByte)).runFold(ByteString(""))((u, z) => z.concat(u))
+
+    val btsToDetect: ByteString = Try(Await.result(bytes, Duration.Inf)) match {
+      case Success(b: ByteString) => b
+      case _ => ByteString("")
+    }
+
+    val detector = new CharsetDetector()
+    val charset = Try(detector.setText(btsToDetect.toArray).detect().getName).getOrElse("UTF-8")
+
+    system.log.debug(s"charset detected: $charset")
+
+    val text = headers.decodeString(charset)
+    ByteString.fromString(text)
+  }
 
   private def rewriteRequestHeaders(headers: ByteString) = {
     val methodProtocolEncoding = "SOURCE (.*) (?:HTTP|ICE)/1.(?:0|1)"
@@ -65,7 +86,9 @@ class OldSourceProxy(interface: String, port: Int, settings: ServerSettings)
       methodProtocolEncoding
     else methodProtocolEncoding.replace("Expect: 100-Continue", s"Host: $interface:$port\r\nExpect: 100-Continue")
 
-    ByteString.fromString(host)
+    system.log.debug(host)
+
+    ByteString.fromString(new String(host.getBytes(), "UTF-8"))
   }
 
   private def rewriteResponseHeaders(headers: ByteString) = {

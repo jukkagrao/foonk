@@ -13,11 +13,9 @@ object StreamDb {
   def update(key: String, value: MediaStream): Option[MediaStream] = streams.put(key, value)
 
   def remove(key: String): Option[MediaStream] = {
-    streams.get(key) match {
-      case Some(stream) =>
-        stream.kill()
-        streams.remove(key)
-      case None => None
+    streams.get(key) flatMap { stream =>
+      stream.kill()
+      streams.remove(key)
     }
   }
 

@@ -2,7 +2,7 @@ package com.jukkagrao.foonk.streams
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.ContentType
+import akka.http.scaladsl.model.{ContentType, DateTime}
 import akka.stream.{Materializer, SharedKillSwitch}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
@@ -27,9 +27,13 @@ trait MediaStream {
 
   def public: Boolean
 
+  def bitrate: Option[String]
+
   def url: Option[String]
 
-  def bitrate: Option[String]
+  def audioInfo: Option[String]
+
+  def connected: DateTime
 
   def switcher(implicit sys: ActorSystem,
                mat: Materializer,

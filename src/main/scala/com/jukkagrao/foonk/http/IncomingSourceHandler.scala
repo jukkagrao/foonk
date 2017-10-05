@@ -8,45 +8,51 @@ import akka.stream.scaladsl.Sink
 import akka.http.scaladsl.server.Route
 import akka.stream.{Materializer, OverflowStrategy}
 import com.jukkagrao.foonk.db.StreamDb
-import com.jukkagrao.foonk.http.auth.SourceAuthenticator
-import com.jukkagrao.foonk.http.methods.SourceMethod
-import com.jukkagrao.foonk.http.headers._
+import com.jukkagrao.foonk.http.directives.Directives._
 import com.jukkagrao.foonk.streams.SourceMediaStream
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class IncomingSourceHandler(implicit sys: ActorSystem, mat: Materializer, ex: ExecutionContext) {
   val route: Route =
-    (put | method(SourceMethod.method)) {
-      authenticateBasic(realm = "foonk source", SourceAuthenticator.authenticator) { _ =>
-        extractRequest { request =>
-          val path = request.uri.path.toString
-          val data = request
-            .entity
-            .withoutSizeLimit()
-            .dataBytes
-            .buffer(8, OverflowStrategy.backpressure)
+    iceSource {
+      streamPath { sPath =>
+        extractIceHeaders { (iName, iDesc, iGenre, iBitrate, iAudioInfo, iUrl, iPublic) =>
+          extractRequestEntity { entity =>
+            val data =
+              entity
+                .withoutSizeLimit()
+                .dataBytes
+                .buffer(8, OverflowStrategy.backpressure)
 
-          val mediaStream = SourceMediaStream(
-            path,
-            data,
-            request.entity.contentType,
-            public = true,
-            request.headers.find(h => h.lowercaseName == `Ice-Name`.lowercaseName).map(_.value),
-            request.headers.find(h => h.lowercaseName == `Ice-Description`.lowercaseName).map(_.value),
-            request.headers.find(h => h.lowercaseName == `Ice-Genre`.lowercaseName).map(_.value)
-          )
-          StreamDb.update(path, mediaStream)
+            val mediaStream = SourceMediaStream(
+              sPath,
+              data,
+              entity.contentType,
+              iPublic,
+              iName,
+              iDesc,
+              iGenre,
+              iBitrate,
+              iAudioInfo,
+              iUrl
+            )
 
-          val done: Future[Done] = mediaStream.source.runWith(Sink.ignore)
+            sys.log.debug(iAudioInfo.getOrElse(""))
 
-          onComplete(done) { _ =>
-            StreamDb.remove(path)
-            complete(StatusCodes.NoContent)
+            StreamDb.update(sPath, mediaStream)
+
+            val done: Future[Done] = mediaStream.source.runWith(Sink.ignore)
+
+            onComplete(done) { _ =>
+              StreamDb.remove(sPath)
+              complete(StatusCodes.NoContent)
+            }
           }
         }
       }
     }
+
 }
 
 object IncomingSourceHandler {

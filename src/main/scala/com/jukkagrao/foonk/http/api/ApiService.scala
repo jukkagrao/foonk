@@ -2,26 +2,18 @@ package com.jukkagrao.foonk.http.api
 
 import javax.ws.rs.Path
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.jukkagrao.foonk.db.{ListenerDb, StreamDb}
 import com.jukkagrao.foonk.http.api.serializers.{ListenerSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
 import com.jukkagrao.foonk.http.directives.Directives._
 import io.swagger.annotations.{Api, ApiOperation, ApiResponse, ApiResponses}
-import spray.json._
 
 
-trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val streamFormat = jsonFormat9(MediaStreamSerializer.apply)
-  implicit val streamsFormat = jsonFormat1(MediaStreamsSerializer)
-  implicit val listenerFormat = jsonFormat3(ListenerSerializer.apply)
-  implicit val streamInfoFormat = jsonFormat2(MediaStreamInfoSerializer.apply)
-}
 
 @Api(value = "/api", description = "", produces = "application/json")
 @Path("/api")
-object ApiService extends JsonSupport {
+object ApiService {
 
   val route: Route = pathPrefix("api" / "streams") {
     pathEnd(getAll) ~ getInfo
