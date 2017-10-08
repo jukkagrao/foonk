@@ -18,10 +18,9 @@ object ApiService {
   val route: Route = pathPrefix("api") {
     pathPrefix("streams") {
       pathEnd(getAll) ~
-        getInfo
-    } ~ pathPrefix("listeners") {
-      kickListener
-    }
+        getInfo ~
+        kickStream
+    } ~ kickListener
   }
 
 
@@ -63,11 +62,30 @@ object ApiService {
       }))
   )
 
+  @Path("/streams/{stream}")
+  @ApiOperation(value = "Kick Stream", notes = "", nickname = "stream_info", httpMethod = "DELETE")
+  @ApiResponses(Array(
+    new ApiResponse(code = 204, message = "Stream was kicked"),
+    new ApiResponse(code = 404, message = "Stream not found")
+  ))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path")
+  ))
+  def kickStream: Route = streamPath { sPath =>
+    delete {
+      StreamDb.get(sPath) match {
+        case Some(stream) =>
+          stream.kill()
+          complete(StatusCodes.NoContent)
+        case None => complete(StatusCodes.NotFound)
+      }
+    }
+  }
 
   @Path("/listeners/{id}")
-  @ApiOperation(value = "Kick listener", notes = "", nickname = "kick_listener", httpMethod = "DELETE")
+  @ApiOperation(value = "Kick Listener", notes = "", nickname = "kick_listener", httpMethod = "DELETE")
   @ApiResponses(Array(
-    new ApiResponse(code = 204, message = "Listener kicked"),
+    new ApiResponse(code = 204, message = "Listener was kicked"),
     new ApiResponse(code = 404, message = "Listener not found")
   ))
   @ApiImplicitParams(Array(
