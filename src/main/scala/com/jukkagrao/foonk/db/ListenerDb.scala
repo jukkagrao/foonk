@@ -3,12 +3,12 @@ package com.jukkagrao.foonk.db
 import com.jukkagrao.foonk.listeners.StreamListener
 
 import scala.collection.parallel.mutable
-import scala.collection.parallel.mutable.ParHashMap
+import scala.collection.parallel.mutable.ParTrieMap
 
 
 object ListenerDb {
 
-  private val listeners: ParHashMap[Int, StreamListener] = new mutable.ParHashMap
+  private val listeners: ParTrieMap[Int, StreamListener] = new mutable.ParTrieMap[Int, StreamListener]
 
   def update(id: Int, value: StreamListener): Option[StreamListener] = listeners.put(id, value)
 
