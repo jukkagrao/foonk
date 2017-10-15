@@ -22,13 +22,13 @@ object MediaStreamInfoSerializer extends SprayJsonSupport with DefaultJsonProtoc
     val listeners = streamWithListeners._2
     new MediaStreamInfoSerializer(
       MediaStreamSerializer(
-        stream.path,
+        stream.mount,
         stream.contentType.toString(),
-        stream.bitrate,
-        stream.name,
-        stream.genre,
-        stream.description,
-        stream.url,
+        stream.info.bitrate,
+        stream.info.name,
+        stream.info.genre,
+        stream.info.description,
+        stream.info.url,
         stream.connected.toIsoDateTimeString,
         listeners.size),
       listeners

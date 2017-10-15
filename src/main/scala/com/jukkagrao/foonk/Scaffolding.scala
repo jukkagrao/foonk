@@ -1,19 +1,19 @@
 package com.jukkagrao.foonk
 
 import akka.actor.{ActorSystem, Scheduler}
-import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.{ParserSettings, ServerSettings}
 import akka.stream.ActorMaterializer
-import com.jukkagrao.foonk.config.FoonkConf
+import com.jukkagrao.foonk.http.RelayClient
 import com.jukkagrao.foonk.http.methods.SourceMethod
 import com.jukkagrao.foonk.proxy.OldSourceProxy
+import com.jukkagrao.foonk.utils.{FoonkConf, Logger}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
-class Scaffolding {
+class Scaffolding extends Logger {
 
   import FoonkConf.conf
 
@@ -21,8 +21,6 @@ class Scaffolding {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionService: ExecutionContextExecutor = system.dispatcher
   implicit val scheduler: Scheduler = system.scheduler
-
-  val log: LoggingAdapter = system.log
 
   def runWebService(route: Route): Unit = {
 
@@ -39,6 +37,11 @@ class Scaffolding {
     binding.onComplete {
       case Success(x) ⇒
         log.info(s"Server is listening on ${x.localAddress.getHostName}:${x.localAddress.getPort}")
+        for (source <- conf.sources) {
+          val relayClient = new RelayClient(source)
+          relayClient.setupStream()
+        }
+
       case Failure(e) ⇒
         log.warning(s"Binding failed with ${e.getMessage}")
     }

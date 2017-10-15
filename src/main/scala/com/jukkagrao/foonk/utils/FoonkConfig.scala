@@ -1,6 +1,8 @@
-package com.jukkagrao.foonk.config
+package com.jukkagrao.foonk.utils
 
 import pureconfig.loadConfigOrThrow
+
+import scala.concurrent.duration._
 
 case class FoonkConfig(version: String,
                        interface: String,
@@ -8,11 +10,11 @@ case class FoonkConfig(version: String,
                        icySupport: Boolean,
                        icyPort: Option[Int],
                        sourceAuth: SourceAuth,
-                       sources: Seq[Source])
+                       sources: Seq[RelaySource])
 
 case class SourceAuth(username: String = "source", password: String)
 
-case class Source(mount: String, url: String, onDemand: Boolean = false)
+case class RelaySource(mount: String, uri: String, onDemand: Boolean = false, connectionTimeout: FiniteDuration = 1.second)
 
 object FoonkConf {
   val conf: FoonkConfig = loadConfigOrThrow[FoonkConfig]("foonk")

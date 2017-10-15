@@ -41,13 +41,13 @@ object MediaStreamSerializer extends SprayJsonSupport with DefaultJsonProtocol {
 
   def apply(stream: MediaStream, listeners: Int = 0): MediaStreamSerializer = {
     MediaStreamSerializer(
-      stream.path,
+      stream.mount,
       stream.contentType.toString(),
-      stream.bitrate,
-      stream.name,
-      stream.genre,
-      stream.description,
-      stream.url,
+      stream.info.bitrate,
+      stream.info.name,
+      stream.info.genre,
+      stream.info.description,
+      stream.info.url,
       stream.connected.toIsoDateTimeString,
       listeners)
   }

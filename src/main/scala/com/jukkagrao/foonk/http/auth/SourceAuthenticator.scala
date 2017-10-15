@@ -2,7 +2,7 @@ package com.jukkagrao.foonk.http.auth
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.server.directives.Credentials
-import com.jukkagrao.foonk.config.FoonkConf
+import com.jukkagrao.foonk.utils.FoonkConf
 
 object SourceAuthenticator {
   import FoonkConf.conf

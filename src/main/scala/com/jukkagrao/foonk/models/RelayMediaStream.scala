@@ -4,15 +4,17 @@ package com.jukkagrao.foonk.models
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
-import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
+import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.util.ByteString
+import com.jukkagrao.foonk.db.StreamDb
 import com.jukkagrao.foonk.http.headers._
+import com.jukkagrao.foonk.utils.Logger
 
 import scala.concurrent.ExecutionContext
 
 
-object RelayMediaStream {
+object RelayMediaStream extends Logger {
 
   def apply(path: String,
             response: HttpResponse)
@@ -26,6 +28,11 @@ object RelayMediaStream {
 
     val src = response.entity.withoutSizeLimit.dataBytes
       .via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString](bufferSize = 2))(Keep.right).run
+      .watchTermination() {
+        (mat, ftDone) =>
+          ftDone.onComplete(_ => StreamDb.remove(path))
+          mat
+      }
 
     def findHeader(lowerCaseName: String) = response.headers.find(h => h.is(lowerCaseName))
 
@@ -36,27 +43,22 @@ object RelayMediaStream {
     val bitrate = findHeader(`Icy-Bitrate`.lowercaseName).map(_.value)
     val url = findHeader(`Icy-Url`.lowercaseName).map(_.value)
     val audioInfo = findHeader(`Icy-Audio-Info`.lowercaseName).map(_.value)
+    val streamInfo = StreamInfo(name, description, genre, bitrate, url, audioInfo, pub)
     val connected = DateTime.now
 
-    RelayMediaStream(path, src, contentType, pub, name, description, genre, bitrate, url, audioInfo, connected, killSwitch)
+    RelayMediaStream(path, src, contentType, streamInfo, connected, killSwitch)
   }
 
-  private case class RelayMediaStream(path: String,
+  private case class RelayMediaStream(mount: String,
                                       source: Source[ByteString, Any],
                                       contentType: ContentType = MediaTypes.`audio/mpeg`,
-                                      public: Boolean = true,
-                                      name: Option[String] = None,
-                                      description: Option[String] = None,
-                                      genre: Option[String] = None,
-                                      bitrate: Option[String] = None,
-                                      url: Option[String] = None,
-                                      audioInfo: Option[String] = None,
+                                      info: StreamInfo,
                                       connected: DateTime,
                                       killSwitch: SharedKillSwitch)
                                      (implicit sys: ActorSystem, mat: Materializer, ev: ExecutionContext)
     extends MediaStream {
 
-    sys.log.info(s"Relay $path created")
+    log.info(s"Relay $mount created")
 
     def stream: Source[ByteString, NotUsed] = switcher.stream
   }

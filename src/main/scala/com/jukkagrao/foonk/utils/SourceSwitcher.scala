@@ -15,7 +15,7 @@ class SourceSwitcher(src: MediaStream)
                      mat: Materializer,
                      executionService: ExecutionContext) {
 
-  private var current = src.path
+  private var current = src.mount
 
   val (sink: Sink[(String, ByteString), NotUsed], stream: Source[ByteString, NotUsed]) =
     MergeHub.source[(String, ByteString)].filter(_._1 == current)
@@ -26,13 +26,13 @@ class SourceSwitcher(src: MediaStream)
   stream.runWith(Sink.ignore)
 
   // add default stream
-  src.source.map(s => (src.path, s)).runWith(sink)
+  src.source.map(s => (src.mount, s)).runWith(sink)
 
-  def switchBack(): Unit = current = src.path
+  def switchBack(): Unit = current = src.mount
 
   def switchTo(thatSrc: MediaStream): Unit = {
-    thatSrc.source.map(s => (thatSrc.path, s)).runWith(sink)
-    current = thatSrc.path
+    thatSrc.source.map(s => (thatSrc.mount, s)).runWith(sink)
+    current = thatSrc.mount
   }
 
   def currentStream: String = current

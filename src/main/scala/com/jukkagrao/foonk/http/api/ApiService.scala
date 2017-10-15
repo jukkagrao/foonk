@@ -32,7 +32,7 @@ object ApiService {
   def getAll: Route = get {
     utf8json {
       complete(MediaStreamsSerializer(StreamDb.all.map { case (_, stream) =>
-        MediaStreamSerializer(stream, ListenerDb.countByPath(stream.path))
+        MediaStreamSerializer(stream, ListenerDb.countByPath(stream.mount))
       }))
     }
   }
