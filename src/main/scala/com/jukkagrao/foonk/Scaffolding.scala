@@ -33,7 +33,7 @@ class Scaffolding {
     val binding = Http().bindAndHandle(
       route,
       conf.interface,
-      conf.icyPort.getOrElse(conf.port + 1),
+      conf.port,
       settings = serverSettings)
 
     binding.onComplete {
@@ -45,7 +45,10 @@ class Scaffolding {
 
     if (conf.icySupport) {
 
-      val proxy = new OldSourceProxy(conf.interface, conf.port + 1, serverSettings).proxy()
+      val proxy = new OldSourceProxy(conf.interface,
+        conf.port,
+        conf.icyPort.getOrElse(conf.port + 1),
+        serverSettings).proxy()
 
       proxy.onComplete {
         case Success(x) ⇒

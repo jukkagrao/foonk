@@ -24,13 +24,13 @@ import scala.util.{Success, Try}
   * @param settings  ServerSettings
   */
 
-class OldSourceProxy(interface: String, port: Int, settings: ServerSettings)
+class OldSourceProxy(interface: String, port: Int, proxyPort: Int, settings: ServerSettings)
                     (implicit system: ActorSystem, mat: Materializer) {
 
   private def bind = {
     Tcp()
       .bind(interface,
-        port,
+        proxyPort,
         settings.backlog,
         settings.socketOptions,
         halfClose = false,
