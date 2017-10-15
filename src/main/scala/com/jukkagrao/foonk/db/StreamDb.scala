@@ -1,6 +1,6 @@
 package com.jukkagrao.foonk.db
 
-import com.jukkagrao.foonk.streams.MediaStream
+import com.jukkagrao.foonk.models.MediaStream
 
 import scala.collection.parallel.mutable
 import scala.collection.parallel.mutable.ParTrieMap

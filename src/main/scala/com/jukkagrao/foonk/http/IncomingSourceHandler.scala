@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.{Materializer, OverflowStrategy}
 import com.jukkagrao.foonk.db.StreamDb
 import com.jukkagrao.foonk.http.directives.Directives._
-import com.jukkagrao.foonk.streams.SourceMediaStream
+import com.jukkagrao.foonk.models.SourceMediaStream
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,8 +37,6 @@ class IncomingSourceHandler(implicit sys: ActorSystem, mat: Materializer, ex: Ex
               iAudioInfo,
               iUrl
             )
-
-            sys.log.debug(iAudioInfo.getOrElse(""))
 
             StreamDb.update(sPath, mediaStream)
 

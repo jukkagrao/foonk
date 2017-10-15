@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives.{path, authenticateBasic, mapRespons
 import com.jukkagrao.foonk.http.auth.SourceAuthenticator
 import com.jukkagrao.foonk.http.headers._
 import com.jukkagrao.foonk.http.methods.SourceMethod
-import com.jukkagrao.foonk.streams.MediaStream
+import com.jukkagrao.foonk.models.MediaStream
 
 object Directives {
   def extractIceHeaders:

@@ -1,4 +1,4 @@
-package com.jukkagrao.foonk.streams
+package com.jukkagrao.foonk.models
 
 import akka.NotUsed
 import akka.actor.ActorSystem
@@ -28,7 +28,7 @@ object SourceMediaStream {
             ev: ExecutionContext): MediaStream = {
 
     val killSwitch = KillSwitches.shared(path)
-    val src = source.via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString](bufferSize = 8))(Keep.right).run
+    val src = source.via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString](bufferSize = 2))(Keep.right).run
     val pub = public.forall(p => Try(p.toBoolean).getOrElse(true))
     val connected = DateTime.now
 

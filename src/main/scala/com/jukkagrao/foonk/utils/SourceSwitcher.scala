@@ -5,7 +5,7 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.stream.scaladsl.{BroadcastHub, Keep, MergeHub, Sink, Source}
 import akka.util.ByteString
-import com.jukkagrao.foonk.streams.MediaStream
+import com.jukkagrao.foonk.models.MediaStream
 
 import scala.concurrent.ExecutionContext
 

@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.jukkagrao.foonk.db.{ListenerDb, StreamDb}
 import com.jukkagrao.foonk.http.directives.Directives._
-import com.jukkagrao.foonk.listeners.Listener
+import com.jukkagrao.foonk.models.Listener
 
 import scala.concurrent.ExecutionContext
 

@@ -63,7 +63,7 @@ object ApiService {
   )
 
   @Path("/streams/{stream}")
-  @ApiOperation(value = "Kick Stream", notes = "", nickname = "stream_info", httpMethod = "DELETE")
+  @ApiOperation(value = "Kick Stream", notes = "", nickname = "kick_stream", httpMethod = "DELETE")
   @ApiResponses(Array(
     new ApiResponse(code = 204, message = "Stream was kicked"),
     new ApiResponse(code = 404, message = "Stream not found")

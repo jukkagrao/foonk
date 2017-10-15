@@ -1,7 +1,7 @@
 package com.jukkagrao.foonk.http.api.serializers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.jukkagrao.foonk.streams.MediaStream
+import com.jukkagrao.foonk.models.MediaStream
 import io.swagger.annotations._
 import spray.json.DefaultJsonProtocol
 

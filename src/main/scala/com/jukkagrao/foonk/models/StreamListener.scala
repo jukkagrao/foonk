@@ -1,4 +1,4 @@
-package com.jukkagrao.foonk.listeners
+package com.jukkagrao.foonk.models
 
 import akka.NotUsed
 import akka.http.scaladsl.model.{DateTime, RemoteAddress}

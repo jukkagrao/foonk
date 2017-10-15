@@ -1,4 +1,4 @@
-package com.jukkagrao.foonk.streams
+package com.jukkagrao.foonk.models
 
 import akka.NotUsed
 import akka.actor.ActorSystem
