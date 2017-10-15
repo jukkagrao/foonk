@@ -30,7 +30,7 @@ class OldSourceProxy(interface: String, port: Int, settings: ServerSettings)
   private def bind = {
     Tcp()
       .bind(interface,
-        port + 1,
+        port,
         settings.backlog,
         settings.socketOptions,
         halfClose = false,

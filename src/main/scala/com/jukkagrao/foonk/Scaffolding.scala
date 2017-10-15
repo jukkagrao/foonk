@@ -6,6 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.{ParserSettings, ServerSettings}
 import akka.stream.ActorMaterializer
+import com.jukkagrao.foonk.config.FoonkConf
 import com.jukkagrao.foonk.http.methods.SourceMethod
 import com.jukkagrao.foonk.proxy.OldSourceProxy
 
@@ -13,6 +14,9 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
 class Scaffolding {
+
+  import FoonkConf.conf
+
   implicit val system: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionService: ExecutionContextExecutor = system.dispatcher
@@ -21,15 +25,16 @@ class Scaffolding {
   val log: LoggingAdapter = system.log
 
   def runWebService(route: Route): Unit = {
-    val config = system.settings.config.getConfig("foonk")
-    val interface = config.getString("interface")
-    val port = config.getInt("port")
 
     // add custom method to parser settings:
     val parserSettings = ParserSettings(system).withCustomMethods(SourceMethod.method)
     val serverSettings = ServerSettings(system).withParserSettings(parserSettings)
 
-    val binding = Http().bindAndHandle(route, interface, port, settings = serverSettings)
+    val binding = Http().bindAndHandle(
+      route,
+      conf.interface,
+      conf.icyPort.getOrElse(conf.port + 1),
+      settings = serverSettings)
 
     binding.onComplete {
       case Success(x) ⇒
@@ -38,9 +43,9 @@ class Scaffolding {
         log.warning(s"Binding failed with ${e.getMessage}")
     }
 
-    if (config.getBoolean("icy-support")) {
+    if (conf.icySupport) {
 
-      val proxy = new OldSourceProxy(interface, port, serverSettings).proxy()
+      val proxy = new OldSourceProxy(conf.interface, conf.port + 1, serverSettings).proxy()
 
       proxy.onComplete {
         case Success(x) ⇒

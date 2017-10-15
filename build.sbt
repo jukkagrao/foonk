@@ -12,9 +12,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.github.swagger-akka-http" %% "swagger-akka-http" % swaggerAkkaVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
+  "com.github.pureconfig" %% "pureconfig" % "0.8.0",
   "com.ibm.icu" % "icu4j" % "59.1",
   "org.scalactic" %% "scalactic" % scalaTestVersion % "test",
-  "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+  "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
 
 )
 
