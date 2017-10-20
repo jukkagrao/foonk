@@ -27,12 +27,8 @@ object RelayMediaStream extends Logger {
     val killSwitch = KillSwitches.shared(path)
 
     val src = response.entity.withoutSizeLimit.dataBytes
-      .via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString](bufferSize = 2))(Keep.right).run
-      .watchTermination() {
-        (mat, ftDone) =>
-          ftDone.onComplete(_ => StreamDb.remove(path))
-          mat
-      }
+      .via(killSwitch.flow)
+      .toMat(BroadcastHub.sink[ByteString](bufferSize = 2))(Keep.right).run
 
     def findHeader(lowerCaseName: String) = response.headers.find(h => h.is(lowerCaseName))
 

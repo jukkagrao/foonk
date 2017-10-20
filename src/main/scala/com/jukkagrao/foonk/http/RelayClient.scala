@@ -2,18 +2,17 @@ package com.jukkagrao.foonk.http
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.dispatch.MessageDispatcher
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import akka.pattern.{CircuitBreaker, after}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.jukkagrao.foonk.db.{OnDemandRelayDb, StreamDb}
-import com.jukkagrao.foonk.models.{RelayMediaStream, StreamInfo}
+import com.jukkagrao.foonk.db.StreamDb
+import com.jukkagrao.foonk.models.RelayMediaStream
 import com.jukkagrao.foonk.utils.{Logger, RelaySource}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 
@@ -34,23 +33,7 @@ class RelayClient(source: RelaySource)
   private[this] def request: Future[HttpResponse] =
     breaker.withCircuitBreaker(Http().singleRequest(HttpRequest(uri = source.uri)))
 
-  def setupStream(): Unit =
-    if (source.onDemand) setupOnDemand() else setupPermanent(source.connectionTimeout)
-
-  def requestOnDemand(): Unit = {
-    implicit val blockingDispatcher: MessageDispatcher =
-      as.dispatchers.lookup("blocking-dispatcher")
-
-    Await.result(request, 5.second) match {
-      case response@HttpResponse(StatusCodes.OK, _, _, _) =>
-        val mediaStream = RelayMediaStream(source.mount, response)
-        StreamDb.update(source.mount, mediaStream)
-        OnDemandRelayDb.update(source.mount, mediaStream.info)
-      case _ =>
-        val info = StreamInfo()
-        OnDemandRelayDb.update(source.mount, info)
-    }
-  }
+  def setupStream(): Unit = setupPermanent(source.connectionTimeout)
 
   private[this] def setupPermanent(timeout: FiniteDuration): Unit =
     after(timeout, as.scheduler)(request).onComplete {
@@ -59,15 +42,10 @@ class RelayClient(source: RelaySource)
         StreamDb.update(source.mount, mediaStream)
         val done: Future[Done] = mediaStream.source.runWith(Sink.ignore)
         done.onComplete { _ =>
-//          StreamDb.remove(source.mount)
+          StreamDb.remove(source.mount)
           setupPermanent(timeout)
         }
       case _ => setupPermanent(timeout)
     }
-
-  private[this] def setupOnDemand() = {
-    val info = StreamInfo()
-    OnDemandRelayDb.update(source.mount, info)
-  }
 
 }
