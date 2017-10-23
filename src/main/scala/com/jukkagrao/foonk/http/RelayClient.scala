@@ -26,17 +26,17 @@ class RelayClient(source: RelaySource)
       as.scheduler,
       maxFailures = 5,
       callTimeout = 10.seconds,
-      resetTimeout = source.connectionTimeout * 15).onOpen {
+      resetTimeout = 15.second).onOpen {
       log.warning(s"CircuitBreaker was opened while requesting to ${source.uri}")
     }
 
   private[this] def request: Future[HttpResponse] =
     breaker.withCircuitBreaker(Http().singleRequest(HttpRequest(uri = source.uri)))
 
-  def setupStream(): Unit = setupPermanent(source.connectionTimeout)
+  def setupStream(): Unit = setupPermanent(source.retryTimeout)
 
   private[this] def setupPermanent(timeout: FiniteDuration): Unit =
-    after(timeout, as.scheduler)(request).onComplete {
+    request.onComplete {
       case Success(response@HttpResponse(StatusCodes.OK, _, _, _)) =>
         val mediaStream = RelayMediaStream(source.mount, response)
         StreamDb.update(source.mount, mediaStream)
@@ -45,7 +45,6 @@ class RelayClient(source: RelaySource)
           StreamDb.remove(source.mount)
           setupPermanent(timeout)
         }
-      case _ => setupPermanent(timeout)
+      case _ => after(timeout, as.scheduler)(Future.successful(setupPermanent(timeout)))
     }
-
 }

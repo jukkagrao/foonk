@@ -22,7 +22,7 @@ object Directives {
 
   def respondWithIcyHeaders(stream: MediaStream): Directive0 = {
     val info = stream.info
-    val headers = Seq(`Icy-Name`, `Icy-Genre`, `Icy-Description`, `Icy-Bitrate`, `Icy-Audio-Info`, `Icy-Url`)
+    val headers = Seq(`Icy-Name`, `Icy-Genre`, `Icy-Description`, `Icy-Br`, `Icy-Audio-Info`, `Icy-Url`)
     val values = Seq(info.name, info.genre, info.description, info.bitrate, info.audioInfo, info.url)
     val headersWithValues = headers.zip(values).flatMap {
       case (header, value) => value.map(header(_))

@@ -13,12 +13,13 @@ case class Listener(streamPath: String,
                     killSwitch: KillSwitch,
                     stream: Source[ByteString, NotUsed]) extends StreamListener
 
+//TODO: make possible to change Listener Stream
 object Listener {
   def apply(path: String, ip: RemoteAddress, stream: Source[ByteString, NotUsed]): Listener = {
     val killSwitch = KillSwitches.shared(stream.hashCode.toString)
-//    val streamKillSwitch = KillSwitches.shared(path)
-    val streamSource = stream.buffer(8, OverflowStrategy.dropNew)
-//      .via(streamKillSwitch.flow)
+    //    val streamKillSwitch = KillSwitches.shared(path)
+    val streamSource = stream.buffer(4, OverflowStrategy.dropNew)
+      //      .via(streamKillSwitch.flow)
       .via(killSwitch.flow).async
 
     new Listener(path, streamSource.hashCode, ip, DateTime.now, killSwitch, streamSource)

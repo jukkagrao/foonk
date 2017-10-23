@@ -62,6 +62,7 @@ object ApiService {
       }))
   )
 
+
   @Path("/streams/{stream}")
   @ApiOperation(value = "Kick Stream", notes = "", nickname = "kick_stream", httpMethod = "DELETE")
   @ApiResponses(Array(
@@ -81,6 +82,7 @@ object ApiService {
       }
     }
   }
+
 
   @Path("/listeners/{id}")
   @ApiOperation(value = "Kick Listener", notes = "", nickname = "kick_listener", httpMethod = "DELETE")

@@ -29,7 +29,7 @@ object SourceMediaStream extends Logger {
             ev: ExecutionContext): MediaStream = {
 
     val killSwitch = KillSwitches.shared(path)
-    val src = source.via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString](bufferSize = 2))(Keep.right).run
+    val src = source.via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString])(Keep.right).run
     val pub = public.forall(p => Try(p.toBoolean).getOrElse(true))
     val streamInfo = StreamInfo(name, description, genre, bitrate, url, audioInfo, pub)
     val connected = DateTime.now

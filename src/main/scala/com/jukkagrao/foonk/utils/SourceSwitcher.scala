@@ -10,25 +10,24 @@ import com.jukkagrao.foonk.models.MediaStream
 import scala.concurrent.ExecutionContext
 
 
-class SourceSwitcher(src: MediaStream)
+class SourceSwitcher(mStream: MediaStream)
                     (implicit sys: ActorSystem,
                      mat: Materializer,
                      executionService: ExecutionContext) {
 
-  private var current = src.mount
+  private var current = mStream.mount
 
   val (sink: Sink[(String, ByteString), NotUsed], stream: Source[ByteString, NotUsed]) =
     MergeHub.source[(String, ByteString)].filter(_._1 == current)
-//      .via(src.killSwitch.flow)
-      .map(_._2).toMat(BroadcastHub.sink[ByteString](bufferSize = 8))(Keep.both)
-      .run()
+      .map(_._2).toMat(BroadcastHub.sink[ByteString](bufferSize = 2))(Keep.both)
+      .run
 
   stream.runWith(Sink.ignore)
 
   // add default stream
-  src.source.map(s => (src.mount, s)).runWith(sink)
+  mStream.source.map(s => (mStream.mount, s)).runWith(sink)
 
-  def switchBack(): Unit = current = src.mount
+  def switchBack(): Unit = current = mStream.mount
 
   def switchTo(thatSrc: MediaStream): Unit = {
     thatSrc.source.map(s => (thatSrc.mount, s)).runWith(sink)

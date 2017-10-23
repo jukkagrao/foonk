@@ -146,15 +146,15 @@ object `Icy-Genre` extends ModeledCustomHeaderCompanion[`Icy-Genre`] {
 }
 
 
-final class `Icy-Bitrate`(bitrate: String) extends ModeledCustomHeader[`Icy-Bitrate`] {
+final class `Icy-Br`(bitrate: String) extends ModeledCustomHeader[`Icy-Br`] {
   override def renderInRequests = false
   override def renderInResponses = true
-  override val companion = `Icy-Bitrate`
+  override val companion = `Icy-Br`
   override def value: String = bitrate
 }
-object `Icy-Bitrate` extends ModeledCustomHeaderCompanion[`Icy-Bitrate`] {
+object `Icy-Br` extends ModeledCustomHeaderCompanion[`Icy-Br`] {
   override val name = "icy-br"
-  override def parse(value: String) = Try(new `Icy-Bitrate`(value))
+  override def parse(value: String) = Try(new `Icy-Br`(value))
 }
 
 

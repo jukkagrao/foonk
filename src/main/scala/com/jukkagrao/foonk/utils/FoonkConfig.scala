@@ -14,7 +14,7 @@ case class FoonkConfig(version: String,
 
 case class SourceAuth(username: String = "source", password: String)
 
-case class RelaySource(mount: String, uri: String, onDemand: Boolean = false, connectionTimeout: FiniteDuration = 1.second)
+case class RelaySource(mount: String, uri: String, onDemand: Boolean = false, retryTimeout: FiniteDuration = 1.second)
 
 object FoonkConf {
   val conf: FoonkConfig = loadConfigOrThrow[FoonkConfig]("foonk")
