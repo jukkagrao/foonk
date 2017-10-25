@@ -11,22 +11,23 @@ import com.jukkagrao.foonk.db.StreamDb
 import com.jukkagrao.foonk.models.RelayMediaStream
 import com.jukkagrao.foonk.utils.{Logger, RelaySource}
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 
 class RelayClient(source: RelaySource)
-                 (implicit ec: ExecutionContext,
-                  as: ActorSystem,
+                 (implicit as: ActorSystem,
                   m: ActorMaterializer) extends Logger {
+
+  import as.dispatcher
 
   private[this] val breaker =
     new CircuitBreaker(
       as.scheduler,
       maxFailures = 5,
       callTimeout = 10.seconds,
-      resetTimeout = 15.second).onOpen {
+      resetTimeout = 15.seconds).onOpen {
       log.warning(s"CircuitBreaker was opened while requesting to ${source.uri}")
     }
 

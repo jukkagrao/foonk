@@ -6,9 +6,8 @@ import akka.http.scaladsl.model.{ContentType, DateTime, MediaTypes}
 import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
 import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.util.ByteString
-import com.jukkagrao.foonk.utils.Logger
+import com.jukkagrao.foonk.utils.{Logger, SourceSwitcher}
 
-import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 
@@ -24,9 +23,8 @@ object SourceMediaStream extends Logger {
             bitrate: Option[String] = None,
             audioInfo: Option[String] = None,
             url: Option[String] = None)
-           (implicit sys: ActorSystem,
-            mat: Materializer,
-            ev: ExecutionContext): MediaStream = {
+           (implicit as: ActorSystem,
+            mat: Materializer): MediaStream = {
 
     val killSwitch = KillSwitches.shared(path)
     val src = source.via(killSwitch.flow).toMat(BroadcastHub.sink[ByteString])(Keep.right).run
@@ -43,12 +41,15 @@ object SourceMediaStream extends Logger {
                                        info: StreamInfo,
                                        connected: DateTime,
                                        killSwitch: SharedKillSwitch)
-                                      (implicit sys: ActorSystem, mat: Materializer, ev: ExecutionContext)
+                                      (implicit as: ActorSystem,
+                                       mat: Materializer)
     extends MediaStream {
 
     log.info(s"Source $mount created")
 
-    def stream: Source[ByteString, NotUsed] = switcher.stream
+    val switcher = SourceSwitcher(this)
+
+    val stream: Source[ByteString, NotUsed] = switcher.stream
   }
 
 }

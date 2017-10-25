@@ -8,7 +8,7 @@ import com.jukkagrao.foonk.http.{IncomingSourceHandler, ListenersHandler}
 object Foonk extends Scaffolding with App {
 
   runWebService {
-    ApiService.route ~
+    ApiService() ~
     ListenersHandler.route ~
     IncomingSourceHandler()
   }

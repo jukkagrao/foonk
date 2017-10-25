@@ -8,18 +8,15 @@ import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
 import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.util.ByteString
 import com.jukkagrao.foonk.http.headers._
-import com.jukkagrao.foonk.utils.Logger
-
-import scala.concurrent.ExecutionContext
+import com.jukkagrao.foonk.utils.{Logger, SourceSwitcher}
 
 
 object RelayMediaStream extends Logger {
 
   def apply(path: String,
             response: HttpResponse)
-           (implicit sys: ActorSystem,
-            mat: Materializer,
-            ev: ExecutionContext): MediaStream = {
+           (implicit as: ActorSystem,
+            mat: Materializer): MediaStream = {
 
     val contentType = response.entity.contentType
 
@@ -34,7 +31,7 @@ object RelayMediaStream extends Logger {
 
     def findHeader(lowerCaseName: String) = response.headers.find(h => h.is(lowerCaseName))
 
-    val pub = findHeader(`Icy-Public`.lowercaseName).forall(_.value.toBoolean)
+    val pub = findHeader(`Icy-Public`.lowercaseName).forall(_.value == "1")
     val name = findHeader(`Icy-Name`.lowercaseName).map(_.value)
     val description = findHeader(`Icy-Description`.lowercaseName).map(_.value)
     val genre = findHeader(`Icy-Genre`.lowercaseName).map(_.value)
@@ -53,12 +50,15 @@ object RelayMediaStream extends Logger {
                                       info: StreamInfo,
                                       connected: DateTime,
                                       killSwitch: SharedKillSwitch)
-                                     (implicit sys: ActorSystem, mat: Materializer, ev: ExecutionContext)
+                                     (implicit as: ActorSystem,
+                                      mat: Materializer)
     extends MediaStream {
 
     log.info(s"Relay $mount created")
 
-    def stream: Source[ByteString, NotUsed] = switcher.stream
+    val switcher = SourceSwitcher(this)
+
+    val stream: Source[ByteString, NotUsed] = switcher.stream
   }
 
 }

@@ -2,9 +2,11 @@ package com.jukkagrao.foonk.http.api
 
 import javax.ws.rs.Path
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.stream.Materializer
 import com.jukkagrao.foonk.db.{ListenerDb, StreamDb}
 import com.jukkagrao.foonk.http.api.serializers.{ListenerSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
 import com.jukkagrao.foonk.http.directives.Directives._
@@ -13,12 +15,14 @@ import io.swagger.annotations._
 
 @Api(value = "/api", description = "", produces = "application/json")
 @Path("/api")
-object ApiService {
+class ApiService(implicit as: ActorSystem, mat: Materializer) {
 
   val route: Route = pathPrefix("api") {
     pathPrefix("streams") {
       pathEnd(getAll) ~
         getInfo ~
+        switchStream ~
+        switchStreamBack ~
         kickStream
     } ~ kickListener
   }
@@ -84,6 +88,43 @@ object ApiService {
   }
 
 
+  @Path("/streams/{stream}/to/{toStream}")
+  @ApiOperation(value = "Switch Stream to another one", notes = "", nickname = "switch_stream", httpMethod = "GET")
+  @ApiResponses(Array(
+    new ApiResponse(code = 201, message = "Stream was switched"),
+    new ApiResponse(code = 404, message = "At least one of Streams not found")
+  ))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
+    new ApiImplicitParam(name = "toStream", value = "Switch to Stream path", required = true, dataType = "string", paramType = "path")
+  ))
+  def switchStream: Route = path(Segment / "to" / Segment) { (from, to) =>
+    get((for {
+      fromStream <- StreamDb.get(from)
+      toStream <- StreamDb.get(to)
+    } yield (fromStream, toStream)).map { case (f, t) =>
+      f.switcher.switchTo(t)
+      complete(StatusCodes.Created)
+    }.getOrElse(complete(StatusCodes.NotFound)))
+  }
+
+  @Path("/streams/{stream}/back")
+  @ApiOperation(value = "Switch Stream to initial", notes = "", nickname = "switch_stream", httpMethod = "GET")
+  @ApiResponses(Array(
+    new ApiResponse(code = 201, message = "Stream was switched"),
+    new ApiResponse(code = 404, message = "Stream not found")
+  ))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
+  ))
+  def switchStreamBack: Route = path(Segment / "back") { stream =>
+    get(StreamDb.get(stream).map { s =>
+      s.switcher.switchBack()
+      complete(StatusCodes.Created)
+    }.getOrElse(complete(StatusCodes.NotFound)))
+  }
+
+
   @Path("/listeners/{id}")
   @ApiOperation(value = "Kick Listener", notes = "", nickname = "kick_listener", httpMethod = "DELETE")
   @ApiResponses(Array(
@@ -103,4 +144,8 @@ object ApiService {
       }
     }
   }
+}
+
+object ApiService {
+  def apply()(implicit as: ActorSystem, mat: Materializer): Route = new ApiService().route
 }
