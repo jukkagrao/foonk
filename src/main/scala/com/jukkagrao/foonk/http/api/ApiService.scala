@@ -108,6 +108,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
     }.getOrElse(complete(StatusCodes.NotFound)))
   }
 
+
   @Path("/streams/{stream}/back")
   @ApiOperation(value = "Switch Stream to initial", notes = "", nickname = "switch_stream", httpMethod = "GET")
   @ApiResponses(Array(

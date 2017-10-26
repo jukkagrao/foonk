@@ -10,12 +10,12 @@ import com.jukkagrao.foonk.models.Listener
 
 object ListenersHandler {
   def route(implicit as: ActorSystem): Route =
-    (get & streamPath & extractClientIP) { (sPath, ip) =>
+    (get & streamPath & extractClientIP & userAgent) { (sPath, ip, ua) =>
       StreamDb.get(sPath) match {
         case Some(strm) =>
           import as.dispatcher
 
-          val listener = Listener(sPath, ip, strm.stream)
+          val listener = Listener(sPath, ip, ua, strm.stream)
           ListenerDb.update(listener.id, listener)
 
           respondWithIcyHeaders(strm) {

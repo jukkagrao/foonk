@@ -1,9 +1,10 @@
 package com.jukkagrao.foonk.http.directives
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.headers.`User-Agent`
 import akka.http.scaladsl.model.{ContentType, MediaTypes}
+import akka.http.scaladsl.server.Directives.{authenticateBasic, extract, mapResponseEntity, method, optionalHeaderValue, path, put, respondWithHeaders}
 import akka.http.scaladsl.server.{Directive, Directive0, Route}
-import akka.http.scaladsl.server.Directives.{path, authenticateBasic, mapResponseEntity, method, optionalHeaderValue, put, respondWithHeaders}
 import com.jukkagrao.foonk.http.auth.SourceAuthenticator
 import com.jukkagrao.foonk.http.headers._
 import com.jukkagrao.foonk.http.methods.SourceMethod
@@ -42,5 +43,7 @@ object Directives {
     )))
 
   def streamPath: Directive[Tuple1[String]] = path("""[\w\d\-_\.]+""".r)
+
+  def userAgent = extract(_.request.header[`User-Agent`])
 
 }

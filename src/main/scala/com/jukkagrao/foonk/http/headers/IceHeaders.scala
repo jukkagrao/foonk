@@ -1,5 +1,7 @@
 package com.jukkagrao.foonk.http.headers
 
+import java.net.URLEncoder
+
 import akka.http.scaladsl.model.headers._
 
 import scala.util.Try
@@ -106,7 +108,7 @@ final class `Icy-Name`(name: String) extends ModeledCustomHeader[`Icy-Name`] {
 }
 object `Icy-Name` extends ModeledCustomHeaderCompanion[`Icy-Name`] {
   override val name = "icy-name"
-  override def parse(value: String) = Try(new `Icy-Name`(java.net.URLEncoder.encode(value, "utf-8").replace("+", "%20")))
+  override def parse(value: String) = Try(new `Icy-Name`(URLEncoder.encode(value, "utf-8").replace("+", "%20")))
 }
 
 
@@ -118,7 +120,7 @@ final class `Icy-Description`(description: String) extends ModeledCustomHeader[`
 }
 object `Icy-Description` extends ModeledCustomHeaderCompanion[`Icy-Description`] {
   override val name = "icy-description"
-  override def parse(value: String) = Try(new `Icy-Description`(java.net.URLEncoder.encode(value, "utf-8").replace("+", "%20")))
+  override def parse(value: String) = Try(new `Icy-Description`(URLEncoder.encode(value, "utf-8").replace("+", "%20")))
 }
 
 

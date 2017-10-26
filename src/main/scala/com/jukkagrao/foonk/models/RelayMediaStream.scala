@@ -8,6 +8,7 @@ import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
 import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.util.ByteString
 import com.jukkagrao.foonk.http.headers._
+import com.jukkagrao.foonk.utils.HttpUtils._
 import com.jukkagrao.foonk.utils.{Logger, SourceSwitcher}
 
 
@@ -29,11 +30,11 @@ object RelayMediaStream extends Logger {
       .toMat(BroadcastHub.sink[ByteString])(Keep.right)
       .run
 
-    def findHeader(lowerCaseName: String) = response.headers.find(h => h.is(lowerCaseName))
+    implicit val resp: HttpResponse = response
 
     val pub = findHeader(`Icy-Public`.lowercaseName).forall(_.value == "1")
-    val name = findHeader(`Icy-Name`.lowercaseName).map(_.value)
-    val description = findHeader(`Icy-Description`.lowercaseName).map(_.value)
+    val name = findHeader(`Icy-Name`.lowercaseName).map(h => urlDecode(h.value))
+    val description = findHeader(`Icy-Description`.lowercaseName).map(h => urlDecode(h.value))
     val genre = findHeader(`Icy-Genre`.lowercaseName).map(_.value)
     val bitrate = findHeader(`Icy-Br`.lowercaseName).map(_.value)
     val url = findHeader(`Icy-Url`.lowercaseName).map(_.value)

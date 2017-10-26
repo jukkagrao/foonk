@@ -15,13 +15,18 @@ final case class ListenerSerializer(@(ApiModelProperty@field)(value = "ID")
                                     @(ApiModelProperty@field)(value = "IP address")
                                     ip: String,
 
+                                    @(ApiModelProperty@field)(value = "User Agent")
+                                    userAgent: String,
+
                                     @(ApiModelProperty@field)(value = "Connection time")
                                     connected: String)
 
 object ListenerSerializer extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val jsonFormat = jsonFormat3(ListenerSerializer.apply)
+  implicit val jsonFormat = jsonFormat4(ListenerSerializer.apply)
 
   def apply(listener: StreamListener): ListenerSerializer =
     new ListenerSerializer(listener.id,
-      listener.ip.toOption.map(_.getHostAddress).getOrElse("unknown"), listener.connected.toIsoDateTimeString)
+      listener.ip.toOption.map(_.getHostAddress).getOrElse("unknown"),
+      listener.userAgent.map(_.value).getOrElse("unknown"),
+      listener.connected.toIsoDateTimeString)
 }
