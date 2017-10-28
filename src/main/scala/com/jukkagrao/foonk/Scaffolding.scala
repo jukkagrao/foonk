@@ -10,7 +10,7 @@ import com.jukkagrao.foonk.http.methods.SourceMethod
 import com.jukkagrao.foonk.proxy.OldSourceProxy
 import com.jukkagrao.foonk.utils.{FoonkConf, Logger}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 class Scaffolding extends Logger {
@@ -19,7 +19,7 @@ class Scaffolding extends Logger {
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val executionService: ExecutionContextExecutor = system.dispatcher
+  implicit val executionService: ExecutionContext = system.dispatcher
   implicit val scheduler: Scheduler = system.scheduler
 
   def runWebService(route: Route): Unit = {

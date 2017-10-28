@@ -15,7 +15,7 @@ import com.jukkagrao.foonk.utils.{Logger, SourceSwitcher}
 object RelayMediaStream extends Logger {
 
   def apply(path: String,
-            response: HttpResponse)
+            response: HttpResponse, source: Source[ByteString, NotUsed])
            (implicit as: ActorSystem,
             mat: Materializer): MediaStream = {
 
@@ -23,14 +23,12 @@ object RelayMediaStream extends Logger {
 
     val killSwitch = KillSwitches.shared(path)
 
-    val src = response.entity
-      .withoutSizeLimit
-      .dataBytes
+    val src = source
       .via(killSwitch.flow)
       .toMat(BroadcastHub.sink[ByteString])(Keep.right)
       .run
 
-    implicit val resp: HttpResponse = response
+    implicit val hds: Seq[HttpHeader] = response.headers
 
     val pub = findHeader(`Icy-Public`.lowercaseName).forall(_.value == "1")
     val name = findHeader(`Icy-Name`.lowercaseName).map(h => urlDecode(h.value))
@@ -55,11 +53,12 @@ object RelayMediaStream extends Logger {
                                       mat: Materializer)
     extends MediaStream {
 
-    log.info(s"Relay $mount created")
 
     val switcher = SourceSwitcher(this)
 
     val stream: Source[ByteString, NotUsed] = switcher.stream
+
+    log.info(s"Relay /$mount created.")
   }
 
 }

@@ -19,17 +19,19 @@ object ListenersHandler extends Logger {
           val listener = Listener(sPath, ip, ua, strm.stream)
           ListenerDb.update(listener.id, listener)
 
-          log.info(s"Listener ${listener.id} connected, IP: ${listener.ip.toOption.getOrElse("unknown")}," +
-            s" ${listener.userAgent.getOrElse("unknown")}")
+          log.info(s"Listener ${listener.id} connected to /$sPath, IP: ${listener.ip.toOption.getOrElse("unknown")}," +
+            s" ${listener.userAgent.getOrElse("unknown")}.")
 
           respondWithIcyHeaders(strm) {
             complete(HttpResponse(entity = HttpEntity(strm.contentType,
               listener.stream.watchTermination() {
-                              (mat, futDone) =>
-                                futDone.onComplete ( _ => ListenerDb.remove(listener.id))
-                                log.info(s"Listener ${listener.id} disconnected")
-                                mat
-                            }
+                (mat, futDone) =>
+                  futDone.onComplete { _ =>
+                    log.info(s"Listener ${listener.id} disconnected.")
+                    ListenerDb.remove(listener.id)
+                  }
+                  mat
+              }
             )))
           }
         case None => complete(StatusCodes.NotFound)

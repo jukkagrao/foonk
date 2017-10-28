@@ -23,6 +23,8 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
         getInfo ~
         switchStream ~
         switchStreamBack ~
+        setupFallback ~
+        removeFallback ~
         kickStream
     } ~ kickListener
   }
@@ -88,41 +90,78 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   }
 
 
-  @Path("/streams/{stream}/to/{toStream}")
+  @Path("/streams/{stream}/switch/{toStream}")
   @ApiOperation(value = "Switch Stream to another one", notes = "", nickname = "switch_stream", httpMethod = "GET")
   @ApiResponses(Array(
     new ApiResponse(code = 201, message = "Stream was switched"),
-    new ApiResponse(code = 404, message = "At least one of Streams not found")
+    new ApiResponse(code = 208, message = "Mount already uses that source"),
+    new ApiResponse(code = 404, message = "At least one of Streams not found"),
+    new ApiResponse(code = 417, message = "Mounts have different Content-Types")
   ))
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
     new ApiImplicitParam(name = "toStream", value = "Switch to Stream path", required = true, dataType = "string", paramType = "path")
   ))
-  def switchStream: Route = path(Segment / "to" / Segment) { (from, to) =>
+  def switchStream: Route = path(Segment / "switch" / Segment) { (from, to) =>
     get((for {
       fromStream <- StreamDb.get(from)
       toStream <- StreamDb.get(to)
-    } yield (fromStream, toStream)).map { case (f, t) =>
-      f.switcher.switchTo(t)
-      complete(StatusCodes.Created)
-    }.getOrElse(complete(StatusCodes.NotFound)))
+    } yield complete(fromStream.switcher.switchTo(toStream))).getOrElse(complete(StatusCodes.NotFound)))
   }
 
 
-  @Path("/streams/{stream}/back")
-  @ApiOperation(value = "Switch Stream to initial", notes = "", nickname = "switch_stream", httpMethod = "GET")
+  @Path("/streams/{stream}/switch")
+  @ApiOperation(value = "Switch Stream to initial", notes = "", nickname = "switch_to_init", httpMethod = "DELETE")
   @ApiResponses(Array(
-    new ApiResponse(code = 201, message = "Stream was switched"),
+    new ApiResponse(code = 201, message = "Stream was switched back"),
+    new ApiResponse(code = 208, message = "Mount already uses that source"),
     new ApiResponse(code = 404, message = "Stream not found")
   ))
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
   ))
-  def switchStreamBack: Route = path(Segment / "back") { stream =>
-    get(StreamDb.get(stream).map { s =>
-      s.switcher.switchBack()
-      complete(StatusCodes.Created)
+  def switchStreamBack: Route = path(Segment / "switch") { stream =>
+    delete(StreamDb.get(stream).map { s =>
+      complete(s.switcher.switchBack())
     }.getOrElse(complete(StatusCodes.NotFound)))
+  }
+
+
+  @Path("/streams/{stream}/fallback/{fallbackStream}")
+  @ApiOperation(value = "Set Stream fallback up", notes = "", nickname = "fallback_stream", httpMethod = "GET")
+  @ApiResponses(Array(
+    new ApiResponse(code = 201, message = "Fallback was set up"),
+    new ApiResponse(code = 409, message = "Mount and fallback are the same streams"),
+    new ApiResponse(code = 404, message = "At least one of Streams not found"),
+    new ApiResponse(code = 417, message = "Mount and fallback have different Content-Types")
+  ))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
+    new ApiImplicitParam(name = "fallbackStream", value = "Fallback Stream path", required = true, dataType = "string", paramType = "path")
+  ))
+  def setupFallback: Route = path(Segment / "fallback" / Segment) { (mount, fallback) =>
+    get((for {
+      mountStream <- StreamDb.get(mount)
+      fallbackStream <- StreamDb.get(fallback)
+    } yield complete(mountStream.switcher.setFallback(fallbackStream)))
+      .getOrElse(complete(StatusCodes.NotFound)))
+  }
+
+
+  @Path("/streams/{stream}/fallback")
+  @ApiOperation(value = "Remove Stream fallback", notes = "", nickname = "fallback_stream", httpMethod = "DELETE")
+  @ApiResponses(Array(
+    new ApiResponse(code = 201, message = "Fallback was removed"),
+    new ApiResponse(code = 404, message = "Stream or fallback not found")
+  ))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
+  ))
+  def removeFallback: Route = path(Segment / "fallback") { mount =>
+    delete((for {
+      mountStream <- StreamDb.get(mount)
+    } yield complete(mountStream.switcher.removeFallback()))
+      .getOrElse(complete(StatusCodes.NotFound)))
   }
 
 

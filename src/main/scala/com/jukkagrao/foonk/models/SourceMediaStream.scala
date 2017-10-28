@@ -45,11 +45,12 @@ object SourceMediaStream extends Logger {
                                        mat: Materializer)
     extends MediaStream {
 
-    log.info(s"Source $mount created")
 
     val switcher = SourceSwitcher(this)
 
     val stream: Source[ByteString, NotUsed] = switcher.stream
+
+    log.info(s"Source $mount created.")
   }
 
 }
