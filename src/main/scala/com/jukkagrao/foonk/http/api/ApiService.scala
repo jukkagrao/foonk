@@ -27,7 +27,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
         removeFallback ~
         kickStream
     } ~ kickListener
-  }
+  } ~ admin
 
 
   @Path("/streams")
@@ -183,6 +183,10 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
         case None => complete(StatusCodes.NotFound)
       }
     }
+  }
+
+  def admin: Route = pathPrefix("admin") {
+    get {complete(StatusCodes.OK)}
   }
 }
 

@@ -44,7 +44,7 @@ class OldSourceProxy(interface: String, port: Int, proxyPort: Int, settings: Ser
     }.to(Sink.ignore).run()
   }
 
-  private def outgoingConnection = {
+  private val outgoingConnection = {
     Tcp().outgoingConnection(interface, port)
   }
 
@@ -78,13 +78,17 @@ class OldSourceProxy(interface: String, port: Int, proxyPort: Int, settings: Ser
   }
 
   private def rewriteRequestHeaders(headers: ByteString) = {
-    val methodProtocolEncoding = "SOURCE (.*) (?:HTTP|ICE)/1.(?:0|1)"
+    val methodProtocol = "(?:SOURCE|PUT) (.*) (?:HTTP|ICE)/1.(?:0|1)"
       .r
-      .replaceFirstIn(headers.utf8String, "PUT $1 HTTP/1.1\r\nExpect: 100-Continue\r\nTransfer-Encoding: chunked")
+      .replaceFirstIn(headers.utf8String, "PUT $1 HTTP/1.1\r\nExpect: 100-Continue")
 
-    val host = if (methodProtocolEncoding.contains("Host"))
-      methodProtocolEncoding
-    else methodProtocolEncoding.replace("Expect: 100-Continue", s"Host: $interface:$port\r\nExpect: 100-Continue")
+    val encoding = if (methodProtocol.contains("Transfer-Encoding"))
+      methodProtocol
+    else methodProtocol.replace("Expect: 100-Continue", "Expect: 100-Continue\r\nTransfer-Encoding: chunked")
+
+    val host = if (encoding.contains("Host"))
+      encoding
+    else encoding.replace("Expect: 100-Continue", s"Host: $interface:$port\r\nExpect: 100-Continue")
 
     system.log.debug(host)
 
@@ -94,7 +98,7 @@ class OldSourceProxy(interface: String, port: Int, proxyPort: Int, settings: Ser
   private def rewriteResponseHeaders(headers: ByteString) = {
     val headersString = headers.utf8String
     val result = if (headersString.contains("HTTP/1.1 100 Continue"))
-      "HTTP/1.0 200 OK\n\n"
+      "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.0 200 OK\r\n\r\n"
     else headersString
 
     ByteString.fromString(result)
