@@ -11,15 +11,15 @@ import scala.annotation.meta.field
 final case class MediaStreamInfoSerializer(@(ApiModelProperty@field)(value = "Media Stream")
                                            stream: MediaStreamSerializer,
 
-                                           @(ApiModelProperty@field)(value = "Listeners")
-                                           listeners: List[ListenerSerializer])
+                                           @(ApiModelProperty@field)(value = "Clients")
+                                           clients: List[ClientSerializer])
 
 object MediaStreamInfoSerializer extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val jsonFormat = jsonFormat2(MediaStreamInfoSerializer.apply)
 
-  def apply(streamWithListeners: (MediaStream, List[ListenerSerializer])): MediaStreamInfoSerializer = {
-    val stream = streamWithListeners._1
-    val listeners = streamWithListeners._2
+  def apply(streamWithClients: (MediaStream, List[ClientSerializer])): MediaStreamInfoSerializer = {
+    val stream = streamWithClients._1
+    val clients = streamWithClients._2
     new MediaStreamInfoSerializer(
       MediaStreamSerializer(
         stream.mount,
@@ -30,8 +30,8 @@ object MediaStreamInfoSerializer extends SprayJsonSupport with DefaultJsonProtoc
         stream.info.description,
         stream.info.url,
         stream.connected.toIsoDateTimeString,
-        listeners.size),
-      listeners
+        clients.size),
+      clients
     )
   }
 }

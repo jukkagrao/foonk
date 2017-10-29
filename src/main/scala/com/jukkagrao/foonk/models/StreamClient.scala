@@ -7,7 +7,7 @@ import akka.stream.KillSwitch
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 
-trait StreamListener {
+trait StreamClient {
 
   def streamPath: String
 

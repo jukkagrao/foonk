@@ -33,13 +33,13 @@ final case class MediaStreamSerializer(@(ApiModelProperty@field)(value = "Stream
                                        @(ApiModelProperty@field)(value = "Connection time")
                                        connected: String,
 
-                                       @(ApiModelProperty@field)(value = "Amount of listeners")
-                                       listeners: Int)
+                                       @(ApiModelProperty@field)(value = "Amount of clients")
+                                       clients: Int)
 
 object MediaStreamSerializer extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val jsonFormat = jsonFormat9(MediaStreamSerializer.apply)
 
-  def apply(stream: MediaStream, listeners: Int = 0): MediaStreamSerializer = {
+  def apply(stream: MediaStream, clients: Int = 0): MediaStreamSerializer = {
     MediaStreamSerializer(
       stream.mount,
       stream.contentType.toString(),
@@ -49,7 +49,7 @@ object MediaStreamSerializer extends SprayJsonSupport with DefaultJsonProtocol {
       stream.info.description,
       stream.info.url,
       stream.connected.toIsoDateTimeString,
-      listeners)
+      clients)
   }
 }
 

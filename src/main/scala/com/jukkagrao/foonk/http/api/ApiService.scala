@@ -7,8 +7,8 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import com.jukkagrao.foonk.db.{ListenerDb, StreamDb}
-import com.jukkagrao.foonk.http.api.serializers.{ListenerSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
+import com.jukkagrao.foonk.db.{ClientDb, StreamDb}
+import com.jukkagrao.foonk.http.api.serializers.{ClientSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
 import com.jukkagrao.foonk.http.directives.Directives._
 import io.swagger.annotations._
 
@@ -26,7 +26,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
         setupFallback ~
         removeFallback ~
         kickStream
-    } ~ kickListener
+    } ~ kickClient
   } ~ admin
 
 
@@ -38,7 +38,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   def getAll: Route = get {
     utf8json {
       complete(MediaStreamsSerializer(StreamDb.all.map { case (_, stream) =>
-        MediaStreamSerializer(stream, ListenerDb.countByPath(stream.mount))
+        MediaStreamSerializer(stream, ClientDb.countByPath(stream.mount))
       }))
     }
   }
@@ -63,8 +63,8 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
 
   private def streamInfo(path: String) = StreamDb.get(path).map(stream =>
     MediaStreamInfoSerializer((stream,
-      ListenerDb.getByPath(path).map { case (_, listener) =>
-        ListenerSerializer(listener)
+      ClientDb.getByPath(path).map { case (_, client) =>
+        ClientSerializer(client)
       }))
   )
 
@@ -165,20 +165,20 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   }
 
 
-  @Path("/listeners/{id}")
-  @ApiOperation(value = "Kick Listener", notes = "", nickname = "kick_listener", httpMethod = "DELETE")
+  @Path("/clients/{id}")
+  @ApiOperation(value = "Kick Client", notes = "", nickname = "kick_client", httpMethod = "DELETE")
   @ApiResponses(Array(
-    new ApiResponse(code = 204, message = "Listener was kicked"),
-    new ApiResponse(code = 404, message = "Listener not found")
+    new ApiResponse(code = 204, message = "Client was kicked"),
+    new ApiResponse(code = 404, message = "Client not found")
   ))
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "id", value = "Listener Id", required = true, dataType = "integer", paramType = "path")
+    new ApiImplicitParam(name = "id", value = "Client Id", required = true, dataType = "integer", paramType = "path")
   ))
-  def kickListener: Route = path("listeners" / IntNumber) { id =>
+  def kickClient: Route = path("clients" / IntNumber) { id =>
     delete {
-      ListenerDb.get(id) match {
-        case Some(listener) =>
-          listener.kill()
+      ClientDb.get(id) match {
+        case Some(client) =>
+          client.kill()
           complete(StatusCodes.NoContent)
         case None => complete(StatusCodes.NotFound)
       }

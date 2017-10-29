@@ -24,7 +24,7 @@ class IncomingSourceHandler(implicit as: ActorSystem, mat: Materializer) {
               entity
                 .withoutSizeLimit()
                 .dataBytes
-//                .buffer(2, OverflowStrategy.backpressure)
+                .buffer(2, OverflowStrategy.backpressure)
 
             val mediaStream = SourceMediaStream(
               sPath,

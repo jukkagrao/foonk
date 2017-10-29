@@ -4,31 +4,31 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.jukkagrao.foonk.db.{ListenerDb, StreamDb}
+import com.jukkagrao.foonk.db.{ClientDb, StreamDb}
 import com.jukkagrao.foonk.http.directives.Directives._
-import com.jukkagrao.foonk.models.Listener
+import com.jukkagrao.foonk.models.Client
 import com.jukkagrao.foonk.utils.Logger
 
-object ListenersHandler extends Logger {
+object ClientsHandler extends Logger {
   def route(implicit as: ActorSystem): Route =
     (get & streamPath & extractClientIP & userAgent) { (sPath, ip, ua) =>
       StreamDb.get(sPath) match {
         case Some(strm) =>
           import as.dispatcher
 
-          val listener = Listener(sPath, ip, ua, strm.stream)
-          ListenerDb.update(listener.id, listener)
+          val client = Client(sPath, ip, ua, strm.stream)
+          ClientDb.update(client.id, client)
 
-          log.info(s"Listener ${listener.id} connected to /$sPath, IP: ${listener.ip.toOption.getOrElse("unknown")}," +
-            s" ${listener.userAgent.getOrElse("unknown")}.")
+          log.info(s"Client ${client.id} connected to /$sPath, IP: ${client.ip.toOption.getOrElse("unknown")}," +
+            s" ${client.userAgent.getOrElse("unknown")}.")
 
           respondWithIcyHeaders(strm) {
             complete(HttpResponse(entity = HttpEntity(strm.contentType,
-              listener.stream.watchTermination() {
+              client.stream.watchTermination() {
                 (mat, futDone) =>
                   futDone.onComplete { _ =>
-                    log.info(s"Listener ${listener.id} disconnected.")
-                    ListenerDb.remove(listener.id)
+                    log.info(s"Client ${client.id} disconnected.")
+                    ClientDb.remove(client.id)
                   }
                   mat
               }

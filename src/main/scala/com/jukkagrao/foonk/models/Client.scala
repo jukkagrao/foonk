@@ -7,26 +7,26 @@ import akka.stream.scaladsl.Source
 import akka.stream.{KillSwitch, KillSwitches, OverflowStrategy}
 import akka.util.ByteString
 
-case class Listener(streamPath: String,
-                    id: Int,
-                    ip: RemoteAddress,
-                    userAgent: Option[`User-Agent`],
-                    connected: DateTime,
-                    killSwitch: KillSwitch,
-                    stream: Source[ByteString, NotUsed]) extends StreamListener
+case class Client(streamPath: String,
+                  id: Int,
+                  ip: RemoteAddress,
+                  userAgent: Option[`User-Agent`],
+                  connected: DateTime,
+                  killSwitch: KillSwitch,
+                  stream: Source[ByteString, NotUsed]) extends StreamClient
 
-//TODO: make possible to change Listener Stream
-object Listener {
+//TODO: make possible to change Client Stream
+object Client {
   def apply(path: String,
             ip: RemoteAddress,
             userAgent: Option[`User-Agent`],
-            stream: Source[ByteString, NotUsed]): Listener = {
+            stream: Source[ByteString, NotUsed]): Client = {
     val killSwitch = KillSwitches.shared(stream.hashCode.toString)
     //    val streamKillSwitch = KillSwitches.shared(path)
     val streamSource = stream.buffer(4, OverflowStrategy.dropNew)
       //      .via(streamKillSwitch.flow)
       .via(killSwitch.flow).async
 
-    new Listener(path, streamSource.hashCode, ip, userAgent, DateTime.now, killSwitch, streamSource)
+    new Client(path, streamSource.hashCode, ip, userAgent, DateTime.now, killSwitch, streamSource)
   }
 }
