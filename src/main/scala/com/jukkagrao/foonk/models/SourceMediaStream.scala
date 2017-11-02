@@ -6,7 +6,8 @@ import akka.http.scaladsl.model.{ContentType, DateTime, MediaTypes}
 import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
 import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.util.ByteString
-import com.jukkagrao.foonk.utils.{Logger, SourceSwitcher}
+import com.jukkagrao.foonk.switchers.{FallbackSwitcher, SourceSwitcher}
+import com.jukkagrao.foonk.utils.Logger
 
 import scala.util.Try
 
@@ -45,11 +46,14 @@ object SourceMediaStream extends Logger {
                                        mat: Materializer)
     extends MediaStream {
 
+    val fallback = FallbackSwitcher(this)
+
     val switcher = SourceSwitcher(this)
 
     val stream: Source[ByteString, NotUsed] = switcher.stream
 
     log.info(s"Source /$mount created.")
+
   }
 
 }

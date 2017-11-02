@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.Sink
 import akka.stream.{Materializer, OverflowStrategy}
-import com.jukkagrao.foonk.db.StreamDb
+import com.jukkagrao.foonk.collections.StreamCollection
 import com.jukkagrao.foonk.http.directives.Directives._
 import com.jukkagrao.foonk.models.SourceMediaStream
 
@@ -39,12 +39,13 @@ class IncomingSourceHandler(implicit as: ActorSystem, mat: Materializer) {
               iUrl
             )
 
-            StreamDb.update(sPath, mediaStream)
+            StreamCollection.update(sPath, mediaStream)
 
             val done: Future[Done] = mediaStream.source.runWith(Sink.ignore)
 
             onComplete(done) { _ =>
-              StreamDb.remove(sPath)
+              mediaStream.fallback.switchToFallback()
+              StreamCollection.remove(sPath)
               complete(StatusCodes.NoContent)
             }
           }

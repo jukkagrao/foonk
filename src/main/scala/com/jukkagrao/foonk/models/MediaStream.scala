@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.{ContentType, DateTime}
 import akka.stream.SharedKillSwitch
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.jukkagrao.foonk.utils.SourceSwitcher
+import com.jukkagrao.foonk.switchers.{FallbackSwitcher, SourceSwitcher}
 
 trait MediaStream {
 
@@ -18,6 +18,8 @@ trait MediaStream {
   val info: StreamInfo
 
   val connected: DateTime
+
+  val fallback: FallbackSwitcher
 
   val switcher: SourceSwitcher
 

@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import com.jukkagrao.foonk.db.{ClientDb, StreamDb}
+import com.jukkagrao.foonk.collections.{ClientCollection, StreamCollection}
 import com.jukkagrao.foonk.http.api.serializers.{ClientSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
 import com.jukkagrao.foonk.http.directives.Directives._
 import io.swagger.annotations._
@@ -22,7 +22,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
       pathEnd(getAll) ~
         getInfo ~
         switchStream ~
-        switchStreamBack ~
+        switchStreamToInit ~
         setupFallback ~
         removeFallback ~
         kickStream
@@ -37,8 +37,8 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   ))
   def getAll: Route = get {
     utf8json {
-      complete(MediaStreamsSerializer(StreamDb.all.map { case (_, stream) =>
-        MediaStreamSerializer(stream, ClientDb.countByPath(stream.mount))
+      complete(MediaStreamsSerializer(StreamCollection.all.map { case (_, stream) =>
+        MediaStreamSerializer(stream, ClientCollection.countByPath(stream.mount))
       }))
     }
   }
@@ -61,9 +61,9 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
     }
   }
 
-  private def streamInfo(path: String) = StreamDb.get(path).map(stream =>
+  private def streamInfo(path: String) = StreamCollection.get(path).map(stream =>
     MediaStreamInfoSerializer((stream,
-      ClientDb.getByPath(path).map { case (_, client) =>
+      ClientCollection.getByPath(path).map { case (_, client) =>
         ClientSerializer(client)
       }))
   )
@@ -80,7 +80,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   ))
   def kickStream: Route = streamPath { sPath =>
     delete {
-      StreamDb.get(sPath) match {
+      StreamCollection.get(sPath) match {
         case Some(stream) =>
           stream.kill()
           complete(StatusCodes.NoContent)
@@ -95,8 +95,9 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   @ApiResponses(Array(
     new ApiResponse(code = 201, message = "Stream was switched"),
     new ApiResponse(code = 208, message = "Mount already uses that source"),
+    new ApiResponse(code = 409, message = "Switching on source itself not allow."),
     new ApiResponse(code = 404, message = "At least one of Streams not found"),
-    new ApiResponse(code = 417, message = "Mounts have different Content-Types")
+    new ApiResponse(code = 415, message = "Mounts have different Content-Types")
   ))
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
@@ -104,14 +105,14 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   ))
   def switchStream: Route = path(Segment / "switch" / Segment) { (from, to) =>
     get((for {
-      fromStream <- StreamDb.get(from)
-      toStream <- StreamDb.get(to)
+      fromStream <- StreamCollection.get(from)
+      toStream <- StreamCollection.get(to)
     } yield complete(fromStream.switcher.switchTo(toStream))).getOrElse(complete(StatusCodes.NotFound)))
   }
 
 
   @Path("/streams/{stream}/switch")
-  @ApiOperation(value = "Switch Stream to initial", notes = "", nickname = "switch_to_init", httpMethod = "DELETE")
+  @ApiOperation(value = "Switch Stream to initial source", notes = "", nickname = "switch_to_init", httpMethod = "DELETE")
   @ApiResponses(Array(
     new ApiResponse(code = 201, message = "Stream was switched back"),
     new ApiResponse(code = 208, message = "Mount already uses that source"),
@@ -120,9 +121,9 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "stream", value = "Stream path", required = true, dataType = "string", paramType = "path"),
   ))
-  def switchStreamBack: Route = path(Segment / "switch") { stream =>
-    delete(StreamDb.get(stream).map { s =>
-      complete(s.switcher.switchBack())
+  def switchStreamToInit: Route = path(Segment / "switch") { stream =>
+    delete(StreamCollection.get(stream).map { s =>
+      complete(s.switcher.switchToInit())
     }.getOrElse(complete(StatusCodes.NotFound)))
   }
 
@@ -141,9 +142,9 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   ))
   def setupFallback: Route = path(Segment / "fallback" / Segment) { (mount, fallback) =>
     get((for {
-      mountStream <- StreamDb.get(mount)
-      fallbackStream <- StreamDb.get(fallback)
-    } yield complete(mountStream.switcher.setFallback(fallbackStream)))
+      mountStream <- StreamCollection.get(mount)
+      fallbackStream <- StreamCollection.get(fallback)
+    } yield complete(mountStream.fallback.addFallback(fallbackStream)))
       .getOrElse(complete(StatusCodes.NotFound)))
   }
 
@@ -159,8 +160,8 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   ))
   def removeFallback: Route = path(Segment / "fallback") { mount =>
     delete((for {
-      mountStream <- StreamDb.get(mount)
-    } yield complete(mountStream.switcher.removeFallback()))
+      mountStream <- StreamCollection.get(mount)
+    } yield complete(mountStream.fallback.removeFallback()))
       .getOrElse(complete(StatusCodes.NotFound)))
   }
 
@@ -176,7 +177,7 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   ))
   def kickClient: Route = path("clients" / IntNumber) { id =>
     delete {
-      ClientDb.get(id) match {
+      ClientCollection.get(id) match {
         case Some(client) =>
           client.kill()
           complete(StatusCodes.NoContent)

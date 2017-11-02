@@ -8,8 +8,9 @@ import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
 import akka.stream.{KillSwitches, Materializer, SharedKillSwitch}
 import akka.util.ByteString
 import com.jukkagrao.foonk.http.headers._
+import com.jukkagrao.foonk.switchers.{FallbackSwitcher, SourceSwitcher}
 import com.jukkagrao.foonk.utils.HttpUtils._
-import com.jukkagrao.foonk.utils.{Logger, SourceSwitcher}
+import com.jukkagrao.foonk.utils.Logger
 
 
 object RelayMediaStream extends Logger {
@@ -53,6 +54,7 @@ object RelayMediaStream extends Logger {
                                       mat: Materializer)
     extends MediaStream {
 
+    val fallback = FallbackSwitcher(this)
 
     val switcher = SourceSwitcher(this)
 

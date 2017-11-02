@@ -1,9 +1,9 @@
-package com.jukkagrao.foonk.db
+package com.jukkagrao.foonk.collections
 
 import com.jukkagrao.foonk.models.MediaStream
 
 
-object StreamDb extends BaseDb[String, MediaStream] {
+object StreamCollection extends BaseCollection[String, MediaStream] {
 
   override def remove(key: String): Option[MediaStream] = {
     entries.get(key) flatMap { stream =>

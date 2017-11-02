@@ -1,11 +1,11 @@
-package com.jukkagrao.foonk.db
+package com.jukkagrao.foonk.collections
 
 import scala.collection.parallel.mutable.ParTrieMap
 
 
-trait BaseDb[A, B] {
+trait BaseCollection[A, B] {
 
-  private[db] val entries: ParTrieMap[A, B] = new ParTrieMap[A, B]
+  private[collections] val entries: ParTrieMap[A, B] = new ParTrieMap[A, B]
 
   def update(key: A, value: B): Option[B] = entries.put(key, value)
 
