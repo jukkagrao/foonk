@@ -15,7 +15,7 @@ import scala.util.{Success, Try}
 
 /** *
   *
-  * This proxy need to rewrite old-fashion ICY protocol to HTTP/1.1
+  * This connector need to rewrite old-fashion ICY protocol to HTTP/1.1
   *
   * It listen incoming connections on port + 1
   *
@@ -24,8 +24,8 @@ import scala.util.{Success, Try}
   * @param settings  ServerSettings
   */
 
-class OldSourceProxy(interface: String, port: Int, proxyPort: Int, settings: ServerSettings)
-                    (implicit system: ActorSystem, mat: Materializer) {
+class IceSourceConnector(interface: String, port: Int, proxyPort: Int, settings: ServerSettings)
+                        (implicit system: ActorSystem, mat: Materializer) {
 
   private def bind = {
     Tcp()
@@ -37,7 +37,7 @@ class OldSourceProxy(interface: String, port: Int, proxyPort: Int, settings: Ser
         idleTimeout = Duration.Inf)
   }
 
-  def proxy(): Future[ServerBinding] = {
+  def connect(): Future[ServerBinding] = {
     bind.map {
       connection =>
         connection handleWith flow

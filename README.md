@@ -8,7 +8,7 @@ All settings here:
 `src/main/resources/application.conf`
 
 For connecting a source client (based on libshout) it uses icy-port setting.
-(On this port running a proxy for Icecast source protocol handling)
+(On this port running a connector for Icecast source protocol handling)
 
 ### Building
 
