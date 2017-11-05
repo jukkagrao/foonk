@@ -4,52 +4,57 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.stream.scaladsl.Sink
 import akka.http.scaladsl.server.Route
+import akka.stream.scaladsl.Sink
 import akka.stream.{Materializer, OverflowStrategy}
-import com.jukkagrao.foonk.db.StreamDb
-import com.jukkagrao.foonk.http.auth.SourceAuthenticator
-import com.jukkagrao.foonk.http.methods.SourceMethod
-import com.jukkagrao.foonk.http.headers._
-import com.jukkagrao.foonk.streams.SourceMediaStream
+import com.jukkagrao.foonk.collections.StreamCollection
+import com.jukkagrao.foonk.http.directives.Directives._
+import com.jukkagrao.foonk.models.SourceMediaStream
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class IncomingSourceHandler(implicit sys: ActorSystem, mat: Materializer, ex: ExecutionContext) {
+class IncomingSourceHandler(implicit as: ActorSystem, mat: Materializer) {
+
   val route: Route =
-    (put | method(SourceMethod.method)) {
-      authenticateBasic(realm = "foonk source", SourceAuthenticator.authenticator) { _ =>
-        extractRequest { request =>
-          val path = request.uri.path.toString
-          val data = request
-            .entity
-            .withoutSizeLimit()
-            .dataBytes
-            .buffer(8, OverflowStrategy.backpressure)
+    iceSource {
+      streamPath { sPath =>
+        extractIceHeaders { (iName, iDesc, iGenre, iBitrate, iAudioInfo, iUrl, iPublic) =>
+          extractRequestEntity { entity =>
+            val data =
+              entity
+                .withoutSizeLimit()
+                .dataBytes
+                .buffer(2, OverflowStrategy.backpressure)
 
-          val mediaStream = SourceMediaStream(
-            path,
-            data,
-            request.entity.contentType,
-            public = true,
-            request.headers.find(h => h.lowercaseName == `Ice-Name`.lowercaseName).map(_.value),
-            request.headers.find(h => h.lowercaseName == `Ice-Description`.lowercaseName).map(_.value),
-            request.headers.find(h => h.lowercaseName == `Ice-Genre`.lowercaseName).map(_.value)
-          )
-          StreamDb.update(path, mediaStream)
+            val mediaStream = SourceMediaStream(
+              sPath,
+              data,
+              entity.contentType,
+              iPublic,
+              iName,
+              iDesc,
+              iGenre,
+              iBitrate,
+              iAudioInfo,
+              iUrl
+            )
 
-          val done: Future[Done] = mediaStream.source.runWith(Sink.ignore)
+            StreamCollection.update(sPath, mediaStream)
 
-          onComplete(done) { _ =>
-            StreamDb.remove(path)
-            complete(StatusCodes.NoContent)
+            val done: Future[Done] = mediaStream.source.runWith(Sink.ignore)
+
+            onComplete(done) { _ =>
+              mediaStream.fallback.switchToFallback()
+              StreamCollection.remove(sPath)
+              complete(StatusCodes.NoContent)
+            }
           }
         }
       }
     }
+
 }
 
 object IncomingSourceHandler {
-  def apply()(implicit sys: ActorSystem, mat: Materializer, ex: ExecutionContext): Route =
-    new IncomingSourceHandler().route
+  def apply()(implicit as: ActorSystem, mat: Materializer): Route = new IncomingSourceHandler().route
 }
