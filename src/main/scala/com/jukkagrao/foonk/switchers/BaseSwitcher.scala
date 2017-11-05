@@ -10,7 +10,7 @@ import com.jukkagrao.foonk.utils.Logger
 
 case class Tag(tag: String) extends AnyVal
 
-abstract class BaseSwitcher(mStream: MediaStream, source: Source[ByteString, Any])
+class BaseSwitcher(mStream: MediaStream, source: Source[ByteString, Any])
                            (implicit as: ActorSystem, m: Materializer)
   extends Logger {
 
@@ -27,7 +27,7 @@ abstract class BaseSwitcher(mStream: MediaStream, source: Source[ByteString, Any
   stream.runWith(Sink.ignore)
 
   protected[switchers] def setDefaultStream(source: Source[ByteString, Any]): NotUsed = {
-    // connect Source to MergeHub with recover for case of Termination
+    // connect Source to MergeHub with recover for case of Source Termination
     source
       .recoverWithRetries(-1, { case _: Throwable => Source.empty })
       .map(s => (defaultTag, s))

@@ -1,6 +1,6 @@
 name := "foonk"
 
-version := "0.0.2-SNAPSHOT"
+version := "0.0.4-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 
@@ -19,7 +19,6 @@ libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % scalaTestVersion % "test",
   "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
-
 )
 
 

@@ -1,0 +1,8 @@
+version: '3'
+services:
+    ms:
+      build: .
+      ports:
+        - "8000:8000"
+        - "8001:8001"
+      restart: always
