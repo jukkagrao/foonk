@@ -2,12 +2,11 @@ package com.jukkagrao.foonk.models
 
 import akka.NotUsed
 import akka.http.scaladsl.model.{ContentType, DateTime}
-import akka.stream.SharedKillSwitch
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.jukkagrao.foonk.switchers.{FallbackSwitcher, SourceSwitcher}
 
-trait MediaStream {
+abstract class MediaStream extends Switcher {
 
   val mount: String
 
@@ -25,8 +24,5 @@ trait MediaStream {
 
   val stream: Source[ByteString, NotUsed]
 
-  val killSwitch: SharedKillSwitch
-
-  def kill(): Unit = killSwitch.shutdown()
-
 }
+

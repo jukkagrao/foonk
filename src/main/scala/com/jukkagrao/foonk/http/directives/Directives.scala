@@ -3,12 +3,13 @@ package com.jukkagrao.foonk.http.directives
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.`User-Agent`
 import akka.http.scaladsl.model.{ContentType, MediaTypes}
-import akka.http.scaladsl.server.Directives.{authenticateBasic, extract, mapResponseEntity, method, optionalHeaderValue, path, put, respondWithHeaders}
+import akka.http.scaladsl.server.Directives.{authenticateBasic, extract, mapResponseEntity, method, optionalHeaderValue, path, post, put, respondWithHeaders}
 import akka.http.scaladsl.server.{Directive, Directive0, Route}
-import com.jukkagrao.foonk.http.auth.SourceAuthenticator
+import com.jukkagrao.foonk.http.auth.BasicAuthenticator
 import com.jukkagrao.foonk.http.headers._
 import com.jukkagrao.foonk.http.methods.SourceMethod
 import com.jukkagrao.foonk.models.MediaStream
+import com.jukkagrao.foonk.utils.{BasicAuth, FoonkConf}
 
 object Directives {
   def extractIceHeaders:
@@ -33,8 +34,9 @@ object Directives {
   }
 
   def iceSource(route: Route)(implicit sys: ActorSystem): Route =
-    (put | method(SourceMethod.method)) {
-      authenticateBasic(realm = "foonk source", SourceAuthenticator.authenticator)(_ => route)
+    (put | post | method(SourceMethod.method)) {
+      implicit val authConfig: BasicAuth = FoonkConf.conf.sourceAuth
+      authenticateBasic(realm = "foonk source", BasicAuthenticator.authenticator)(_ => route)
     }
 
   def utf8json: Directive0 = mapResponseEntity(_.withContentType(

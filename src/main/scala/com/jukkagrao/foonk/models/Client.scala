@@ -22,9 +22,7 @@ object Client {
             userAgent: Option[`User-Agent`],
             stream: Source[ByteString, NotUsed]): Client = {
     val killSwitch = KillSwitches.shared(stream.hashCode.toString)
-    //    val streamKillSwitch = KillSwitches.shared(path)
     val streamSource = stream.buffer(4, OverflowStrategy.dropNew)
-      //      .via(streamKillSwitch.flow)
       .via(killSwitch.flow).async
 
     new Client(path, streamSource.hashCode, ip, userAgent, DateTime.now, killSwitch, streamSource)

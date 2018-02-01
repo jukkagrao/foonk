@@ -4,10 +4,10 @@ version := "0.0.4-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 
-val akkaHttpVersion = "10.0.10"
-val akkaVersion = "2.5.6"
+val akkaHttpVersion = "10.1.0-RC1"
+val akkaVersion = "2.5.9"
 val scalaTestVersion = "3.0.1"
-val swaggerAkkaVersion = "0.11.0"
+val swaggerAkkaVersion = "0.12.0"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
