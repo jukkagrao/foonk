@@ -6,7 +6,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.jukkagrao.foonk.switchers.{FallbackSwitcher, SourceSwitcher}
 
-abstract class MediaStream extends Switcher {
+abstract class MediaStream extends KillSwitcher {
 
   val mount: String
 

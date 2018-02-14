@@ -2,7 +2,7 @@ package com.jukkagrao.foonk.models
 
 import akka.stream.KillSwitch
 
-trait Switcher {
+trait KillSwitcher {
 
   val killSwitch: KillSwitch
 

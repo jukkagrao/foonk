@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.{DateTime, RemoteAddress}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 
-abstract class StreamClient extends Switcher {
+abstract class StreamClient extends KillSwitcher {
 
   def streamPath: String
 
