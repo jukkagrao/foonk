@@ -9,7 +9,7 @@ import com.jukkagrao.foonk.http.auth.BasicAuthenticator
 import com.jukkagrao.foonk.http.headers._
 import com.jukkagrao.foonk.http.methods.SourceMethod
 import com.jukkagrao.foonk.models.MediaStream
-import com.jukkagrao.foonk.utils.{BasicAuth, FoonkConf}
+import com.jukkagrao.foonk.utils.FoonkConf
 
 object Directives {
   def extractIceHeaders:
@@ -35,8 +35,8 @@ object Directives {
 
   def iceSource(route: Route)(implicit sys: ActorSystem): Route =
     (put | post | method(SourceMethod.method)) {
-      implicit val authConfig: BasicAuth = FoonkConf.conf.sourceAuth
-      authenticateBasic(realm = "foonk source", BasicAuthenticator.authenticator)(_ => route)
+      authenticateBasic(realm = "foonk source",
+        BasicAuthenticator.authenticator(FoonkConf.conf.sourceAuth))(_ => route)
     }
 
   def utf8json: Directive0 = mapResponseEntity(_.withContentType(

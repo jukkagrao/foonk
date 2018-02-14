@@ -5,6 +5,7 @@ import pureconfig.loadConfigOrThrow
 import scala.concurrent.duration._
 
 case class FoonkConfig(version: String,
+                       host: String,
                        interface: String,
                        port: Int,
                        icySupport: Boolean,

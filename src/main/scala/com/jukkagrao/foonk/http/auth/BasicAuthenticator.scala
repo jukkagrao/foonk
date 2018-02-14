@@ -6,7 +6,7 @@ import com.jukkagrao.foonk.utils.BasicAuth
 
 object BasicAuthenticator {
 
-  def authenticator(credentials: Credentials)(implicit sys: ActorSystem, authConfig: BasicAuth): Option[String] = {
+  def authenticator(authConfig: BasicAuth)(credentials: Credentials)(implicit sys: ActorSystem): Option[String] = {
     val password = authConfig.password
     val username = authConfig.username
 

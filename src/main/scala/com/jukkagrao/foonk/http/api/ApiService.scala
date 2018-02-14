@@ -11,7 +11,7 @@ import com.jukkagrao.foonk.collections.{ClientCollection, StreamCollection}
 import com.jukkagrao.foonk.http.api.serializers.{ClientSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
 import com.jukkagrao.foonk.http.auth.BasicAuthenticator
 import com.jukkagrao.foonk.http.directives.Directives._
-import com.jukkagrao.foonk.utils.{BasicAuth, FoonkConf}
+import com.jukkagrao.foonk.utils.FoonkConf
 import io.swagger.annotations._
 
 
@@ -196,8 +196,9 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
 }
 
 object ApiService {
+  import FoonkConf.conf
   def apply()(implicit as: ActorSystem, mat: Materializer): Route = {
-    implicit val authConfig: BasicAuth = FoonkConf.conf.apiAuth
-    authenticateBasic(realm = "foonk API", BasicAuthenticator.authenticator)(_ => new ApiService().route)
+    authenticateBasic(realm = "foonk API",
+      BasicAuthenticator.authenticator(conf.apiAuth))(_ => new ApiService().route)
   }
 }

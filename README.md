@@ -24,3 +24,6 @@ When it's necessary to use external config file you can put your settings to `/c
 - Without:
   To run the application you must have Java installed and then just type `java -Dconfig.file=path/to/foonk.conf -jar path/to/foonk.jar` in command line. 
 
+### API documentation
+
+This documentation is available in OpenAPI (Swagger 2) format, its possible to download docs from running application by accessing to http://app-host:8000/api-docs/swagger.json or in `docs/api` folder.
