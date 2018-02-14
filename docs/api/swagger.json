@@ -1,0 +1,383 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "",
+    "version" : "0.0.4",
+    "title" : "",
+    "termsOfService" : ""
+  },
+  "host" : "localhost:8000",
+  "basePath" : "/",
+  "tags" : [ {
+    "name" : "api"
+  } ],
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/api/streams/{stream}" : {
+      "get" : {
+        "tags" : [ "api" ],
+        "summary" : "Return info about stream",
+        "description" : "",
+        "operationId" : "stream_info",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "stream",
+          "in" : "path",
+          "description" : "Stream path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Stream Info",
+            "schema" : {
+              "$ref" : "#/definitions/MediaStreamInfoSerializer"
+            }
+          },
+          "404" : {
+            "description" : "Stream not found"
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "api" ],
+        "summary" : "Kick Stream",
+        "description" : "",
+        "operationId" : "kick_stream",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "stream",
+          "in" : "path",
+          "description" : "Stream path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Function1RequestContextFutureRouteResult"
+            }
+          },
+          "204" : {
+            "description" : "Stream was kicked"
+          },
+          "404" : {
+            "description" : "Stream not found"
+          }
+        }
+      }
+    },
+    "/api/streams/{stream}/switch/{toStream}" : {
+      "get" : {
+        "tags" : [ "api" ],
+        "summary" : "Switch Stream to another one",
+        "description" : "",
+        "operationId" : "switch_stream",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "stream",
+          "in" : "path",
+          "description" : "Stream path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "toStream",
+          "in" : "path",
+          "description" : "Switch to Stream path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Function1RequestContextFutureRouteResult"
+            }
+          },
+          "201" : {
+            "description" : "Stream was switched"
+          },
+          "208" : {
+            "description" : "Mount already uses that source"
+          },
+          "409" : {
+            "description" : "Switching on source itself not allow."
+          },
+          "404" : {
+            "description" : "At least one of Streams not found"
+          },
+          "415" : {
+            "description" : "Mounts have different Content-Types"
+          }
+        }
+      }
+    },
+    "/api/streams/{stream}/switch" : {
+      "delete" : {
+        "tags" : [ "api" ],
+        "summary" : "Switch Stream to initial source",
+        "description" : "",
+        "operationId" : "switch_to_init",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "stream",
+          "in" : "path",
+          "description" : "Stream path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Function1RequestContextFutureRouteResult"
+            }
+          },
+          "201" : {
+            "description" : "Stream was switched back"
+          },
+          "208" : {
+            "description" : "Mount already uses that source"
+          },
+          "404" : {
+            "description" : "Stream not found"
+          }
+        }
+      }
+    },
+    "/api/streams/{stream}/fallback/{fallbackStream}" : {
+      "get" : {
+        "tags" : [ "api" ],
+        "summary" : "Set Stream fallback up",
+        "description" : "",
+        "operationId" : "fallback_stream",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "stream",
+          "in" : "path",
+          "description" : "Stream path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "fallbackStream",
+          "in" : "path",
+          "description" : "Fallback Stream path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Function1RequestContextFutureRouteResult"
+            }
+          },
+          "201" : {
+            "description" : "Fallback was set up"
+          },
+          "409" : {
+            "description" : "Mount and fallback are the same streams"
+          },
+          "404" : {
+            "description" : "At least one of Streams not found"
+          },
+          "417" : {
+            "description" : "Mount and fallback have different Content-Types"
+          }
+        }
+      }
+    },
+    "/api/streams/{stream}/fallback" : {
+      "delete" : {
+        "tags" : [ "api" ],
+        "summary" : "Remove Stream fallback",
+        "description" : "",
+        "operationId" : "fallback_stream",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "stream",
+          "in" : "path",
+          "description" : "Stream path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Function1RequestContextFutureRouteResult"
+            }
+          },
+          "201" : {
+            "description" : "Fallback was removed"
+          },
+          "404" : {
+            "description" : "Stream or fallback not found"
+          }
+        }
+      }
+    },
+    "/api/clients/{id}" : {
+      "delete" : {
+        "tags" : [ "api" ],
+        "summary" : "Kick Client",
+        "description" : "",
+        "operationId" : "kick_client",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Client Id",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Function1RequestContextFutureRouteResult"
+            }
+          },
+          "204" : {
+            "description" : "Client was kicked"
+          },
+          "404" : {
+            "description" : "Client not found"
+          }
+        }
+      }
+    },
+    "/api/streams" : {
+      "get" : {
+        "tags" : [ "api" ],
+        "summary" : "Return listing of streams",
+        "description" : "",
+        "operationId" : "streams_all",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "List of Streams",
+            "schema" : {
+              "$ref" : "#/definitions/MediaStreamsSerializer"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "basicAuth" : {
+      "type" : "basic"
+    }
+  },
+  "definitions" : {
+    "Function1" : {
+      "type" : "object"
+    },
+    "Function1RequestContextFutureRouteResult" : {
+      "type" : "object"
+    },
+    "ClientSerializer" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "ID"
+        },
+        "ip" : {
+          "type" : "string",
+          "description" : "IP address"
+        },
+        "userAgent" : {
+          "type" : "string",
+          "description" : "User Agent"
+        },
+        "connected" : {
+          "type" : "string",
+          "description" : "Connection time"
+        }
+      },
+      "description" : "Client"
+    },
+    "MediaStreamInfoSerializer" : {
+      "type" : "object",
+      "properties" : {
+        "stream" : {
+          "description" : "Media Stream",
+          "$ref" : "#/definitions/MediaStreamSerializer"
+        },
+        "clients" : {
+          "type" : "array",
+          "description" : "Clients",
+          "items" : {
+            "$ref" : "#/definitions/ClientSerializer"
+          }
+        }
+      },
+      "description" : "MediaStream"
+    },
+    "MediaStreamSerializer" : {
+      "type" : "object",
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "description" : "Stream path"
+        },
+        "contentType" : {
+          "type" : "string",
+          "description" : "ContentType"
+        },
+        "bitrate" : {
+          "type" : "string",
+          "description" : "Bitrate"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Station name"
+        },
+        "genre" : {
+          "type" : "string",
+          "description" : "Genre"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Stream description"
+        },
+        "url" : {
+          "type" : "string",
+          "description" : "Station URL"
+        },
+        "connected" : {
+          "type" : "string",
+          "description" : "Connection time"
+        },
+        "clients" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Amount of clients"
+        }
+      },
+      "description" : "MediaStream"
+    },
+    "MediaStreamsSerializer" : {
+      "type" : "object",
+      "required" : [ "streams" ],
+      "properties" : {
+        "streams" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/MediaStreamSerializer"
+          }
+        }
+      },
+      "description" : "MediaStreams list"
+    }
+  },
+  "externalDocs" : {
+    "description" : "Foonk Docs",
+    "url" : "https://github.com/jukkagrao/foonk/docs"
+  }
+}

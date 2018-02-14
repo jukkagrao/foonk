@@ -7,7 +7,7 @@ import akka.http.scaladsl.settings.{ParserSettings, ServerSettings}
 import akka.stream.ActorMaterializer
 import com.jukkagrao.foonk.http.RelayClient
 import com.jukkagrao.foonk.http.methods.SourceMethod
-import com.jukkagrao.foonk.proxy.OldSourceProxy
+import com.jukkagrao.foonk.proxy.IceSourceConnector
 import com.jukkagrao.foonk.utils.{FoonkConf, Logger}
 
 import scala.concurrent.ExecutionContext
@@ -48,14 +48,14 @@ class Scaffolding extends Logger {
 
     if (conf.icySupport) {
 
-      val proxy = new OldSourceProxy(conf.interface,
+      val icyConnector = new IceSourceConnector(conf.interface,
         conf.port,
         conf.icyPort.getOrElse(conf.port + 1),
-        serverSettings).proxy()
+        serverSettings).connect()
 
-      proxy.onComplete {
+      icyConnector.onComplete {
         case Success(x) ⇒
-          log.info(s"Proxy Source Server is listening on ${x.localAddress.getHostName}:${x.localAddress.getPort}")
+          log.info(s"Ice Source Connector is listening on ${x.localAddress.getHostName}:${x.localAddress.getPort}")
         case Failure(e) ⇒
           log.warning(s"Binding failed with ${e.getMessage}")
       }

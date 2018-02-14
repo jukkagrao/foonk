@@ -9,7 +9,9 @@ import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import com.jukkagrao.foonk.collections.{ClientCollection, StreamCollection}
 import com.jukkagrao.foonk.http.api.serializers.{ClientSerializer, MediaStreamInfoSerializer, MediaStreamSerializer, MediaStreamsSerializer}
+import com.jukkagrao.foonk.http.auth.BasicAuthenticator
 import com.jukkagrao.foonk.http.directives.Directives._
+import com.jukkagrao.foonk.utils.FoonkConf
 import io.swagger.annotations._
 
 
@@ -187,10 +189,16 @@ class ApiService(implicit as: ActorSystem, mat: Materializer) {
   }
 
   def admin: Route = pathPrefix("admin") {
-    get {complete(StatusCodes.OK)}
+    get {
+      complete(StatusCodes.OK)
+    }
   }
 }
 
 object ApiService {
-  def apply()(implicit as: ActorSystem, mat: Materializer): Route = new ApiService().route
+  import FoonkConf.conf
+  def apply()(implicit as: ActorSystem, mat: Materializer): Route = {
+    authenticateBasic(realm = "foonk API",
+      BasicAuthenticator.authenticator(conf.apiAuth))(_ => new ApiService().route)
+  }
 }

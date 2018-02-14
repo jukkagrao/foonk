@@ -1,13 +1,13 @@
 name := "foonk"
 
-version := "0.0.4-SNAPSHOT"
+version := "0.0.5-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 
-val akkaHttpVersion = "10.0.10"
-val akkaVersion = "2.5.6"
+val akkaHttpVersion = "10.1.0-RC2"
+val akkaVersion = "2.5.9"
 val scalaTestVersion = "3.0.1"
-val swaggerAkkaVersion = "0.11.0"
+val swaggerAkkaVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
@@ -21,10 +21,12 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
 )
 
+libraryDependencies += "javax.xml.bind" % "jaxb-api" % "2.3.0"
 
 mainClass in Compile := Some("com.jukkagrao.foonk.Foonk")
 
 mainClass in assembly := Some("com.jukkagrao.foonk.Foonk")
+
 
 assemblyJarName in assembly := "foonk.jar"
 

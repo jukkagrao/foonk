@@ -5,14 +5,16 @@ import pureconfig.loadConfigOrThrow
 import scala.concurrent.duration._
 
 case class FoonkConfig(version: String,
+                       host: String,
                        interface: String,
                        port: Int,
                        icySupport: Boolean,
                        icyPort: Option[Int],
-                       sourceAuth: SourceAuth,
+                       apiAuth: BasicAuth,
+                       sourceAuth: BasicAuth,
                        sources: Seq[RelaySource])
 
-case class SourceAuth(username: String = "source", password: String)
+case class BasicAuth(username: String, password: String)
 
 case class RelaySource(mount: String, uri: String, onDemand: Boolean = false, retryTimeout: FiniteDuration = 1.second)
 
