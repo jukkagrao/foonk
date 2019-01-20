@@ -1,7 +1,5 @@
 package com.jukkagrao.foonk.http.api
 
-import javax.ws.rs.Path
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
@@ -13,9 +11,10 @@ import com.jukkagrao.foonk.http.auth.BasicAuthenticator
 import com.jukkagrao.foonk.http.directives.Directives._
 import com.jukkagrao.foonk.utils.FoonkConf
 import io.swagger.annotations._
+import javax.ws.rs.Path
 
 
-@Api(value = "/api", description = "", produces = "application/json")
+@Api(value = "/api", produces = "application/json")
 @Path("/api")
 class ApiService(implicit as: ActorSystem, mat: Materializer) {
 

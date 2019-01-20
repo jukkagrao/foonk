@@ -1,20 +1,18 @@
 name := "foonk"
 
-version := "0.0.5-SNAPSHOT"
+version := "0.0.6-SNAPSHOT"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.8"
 
-val akkaHttpVersion = "10.1.0-RC2"
-val akkaVersion = "2.5.9"
-val scalaTestVersion = "3.0.1"
-val swaggerAkkaVersion = "0.13.0"
+val akkaHttpVersion = "10.1.7"
+val scalaTestVersion = "3.0.5"
+val swaggerAkkaVersion = "1.0.0"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   "com.github.swagger-akka-http" %% "swagger-akka-http" % swaggerAkkaVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-  "com.github.pureconfig" %% "pureconfig" % "0.8.0",
+  "com.github.pureconfig" %% "pureconfig" % "0.10.1",
   "com.ibm.icu" % "icu4j" % "59.1",
   "org.scalactic" %% "scalactic" % scalaTestVersion % "test",
   "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
