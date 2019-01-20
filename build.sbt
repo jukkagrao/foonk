@@ -8,6 +8,7 @@ val akkaHttpVersion = "10.1.7"
 val scalaTestVersion = "3.0.5"
 val swaggerAkkaVersion = "1.0.0"
 
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.github.swagger-akka-http" %% "swagger-akka-http" % swaggerAkkaVersion,
